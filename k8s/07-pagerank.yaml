@@ -1,0 +1,36 @@
+# Deploy a single instance of the pagerank service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: services-pagerank-instance
+  namespace: services
+  labels:
+    app: services-pagerank-instance
+spec:
+  selector:
+    matchLabels:
+      app: services-pagerank-instance
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: services-pagerank-instance
+    spec:
+      containers:
+      - name: services-pagerank
+        imagePullPolicy: Always
+        image: localhost:5000/services-pagerank:latest
+        args:
+          - "-update-interval=15m"
+          - "-num-workers=8"
+          - "-link-graph-api=services-linkgraph.services-data:8080"
+          - "-text-indexer-api=services-textindexer.services-data:8080"
+          - "-partition-detection-mode=single"
+        ports:
+        - containerPort: 6060
+          name: pprof
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 50m

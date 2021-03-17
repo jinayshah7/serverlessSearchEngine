@@ -1,0 +1,53 @@
+# A headless service which allows pods to discover the number of pods in the 
+# stateful set by performing SRV queries.
+apiVersion: v1
+kind: Service
+metadata:
+  name: services-crawler-headless
+  namespace: services
+spec:
+  clusterIP: None
+  # Include the pprof port to ensure that SRV records are properly generated
+  ports:
+  - port: 6060
+    targetPort: 6060
+    name: pprof
+  selector:
+    app: services-crawler-instance
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: services-crawler-instance
+  namespace: services
+  labels:
+    app: services-crawler-instance
+spec:
+  serviceName: services-crawler-headless
+  selector:
+    matchLabels:
+      app: services-crawler-instance
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: services-crawler-instance
+    spec:
+      containers:
+      - name: services-crawler
+        imagePullPolicy: Always
+        image: localhost:5000/services-crawler:latest
+        args:
+          - "-update-interval=5m"
+          - "-num-workers=64"
+          - "-link-graph-api=services-linkgraph.services-data:8080"
+          - "-text-indexer-api=services-textindexer.services-data:8080"
+          - "-partition-detection-mode=dns=services-crawler-headless"
+        ports:
+        - containerPort: 6060
+          name: pprof
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 100m

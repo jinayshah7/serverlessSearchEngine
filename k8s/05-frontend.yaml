@@ -1,0 +1,58 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: services-ingress
+  namespace: services
+spec:
+  backend:
+    serviceName: services-frontend
+    servicePort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: services-frontend
+  namespace: services
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: web
+  selector:
+    app: services-frontend-instance
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: services-frontend-instance
+  namespace: services
+  labels:
+    app: services-frontend-instance
+spec:
+  selector:
+    matchLabels:
+      app: services-frontend-instance
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: services-frontend-instance
+    spec:
+      containers:
+      - name: services-frontend
+        imagePullPolicy: Always
+        image: localhost:5000/services-frontend:latest
+        args:
+          - "-link-graph-api=services-linkgraph.services-data:8080"
+          - "-text-indexer-api=services-textindexer.services-data:8080"
+        ports:
+        - containerPort: 8080
+          name: www
+        - containerPort: 6060
+          name: pprof
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 50m

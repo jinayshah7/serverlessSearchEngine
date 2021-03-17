@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: services-linkgraph
+  namespace: services-data
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: grpc
+  selector:
+    app: services-linkgraph-instance
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: services-linkgraph-instance
+  namespace: services-data
+  labels:
+    app: services-linkgraph-instance
+spec:
+  selector:
+    matchLabels:
+      app: services-linkgraph-instance
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: services-linkgraph-instance
+        role: data-api
+    spec:
+      containers:
+      - name: services-linkgraph
+        imagePullPolicy: Always
+        image: localhost:5000/services-linkgraph:latest
+        args:
+          - "-link-graph-uri=postgresql://cdb-cockroachdb-public.services-data:26257/linkgraph?sslmode=disable"
+        ports:
+        - containerPort: 8080
+          name: grpc
+        - containerPort: 6060
+          name: pprof
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 50m
