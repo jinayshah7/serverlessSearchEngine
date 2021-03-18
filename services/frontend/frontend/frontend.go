@@ -12,16 +12,16 @@ import (
 	"strconv"
 	"strings"
 
-	"distributedSearchEngine/services/linkgraph/graph"
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-multierror"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks.go distributedSearchEngine/services/linksrus/service/frontend GraphAPI,IndexAPI
-//go:generate mockgen -package mocks -destination mocks/mock_indexer.go distributedSearchEngine/services/textindexer/index Iterator
+//go:generate mockgen -package mocks -destination mocks/mocks.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/service/frontend GraphAPI,IndexAPI
+//go:generate mockgen -package mocks -destination mocks/mock_indexer.go github.com/jinayshah7/distributedSearchEngine/services/textindexer/index Iterator
 
 const (
 	indexEndpoint      = "/"

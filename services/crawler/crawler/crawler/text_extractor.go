@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"distributedSearchEngine/services/crawler/pipeline"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
 	"github.com/microcosm-cc/bluemonday"
 )
 

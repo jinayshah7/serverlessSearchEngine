@@ -6,20 +6,20 @@ import (
 	"net/http"
 	"time"
 
-	crawlerpipeline "distributedSearchEngine/services/crawler/crawler/crawler"
-	"distributedSearchEngine/services/crawler/crawler/crawler/privnet"
-	"distributedSearchEngine/services/crawler/partition"
-	"distributedSearchEngine/services/linkgraph/graph"
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
+	crawlerpipeline "github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler/crawler"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler/crawler/privnet"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/partition"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 	"github.com/juju/clock"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks.go distributedSearchEngine/services/linksrus/service/crawler GraphAPI,IndexAPI
-//go:generate mockgen -package mocks -destination mocks/mock_iterator.go distributedSearchEngine/services/linkgraph/graph LinkIterator
+//go:generate mockgen -package mocks -destination mocks/mocks.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/service/crawler GraphAPI,IndexAPI
+//go:generate mockgen -package mocks -destination mocks/mock_iterator.go github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph LinkIterator
 
 // GraphAPI defines as set of API methods for accessing the link graph.
 type GraphAPI interface {

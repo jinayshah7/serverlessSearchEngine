@@ -3,7 +3,7 @@ package cdb
 import (
 	"database/sql"
 
-	"distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
 	"golang.org/x/xerrors"
 )
 

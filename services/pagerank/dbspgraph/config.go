@@ -3,15 +3,15 @@ package dbspgraph
 import (
 	"io/ioutil"
 
-	"distributedSearchEngine/services/pagerank/dbspgraph/job"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/hashicorp/go-multierror"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/job"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks_serializer.go distributedSearchEngine/services/pagerank/dbspgraph Serializer
-//go:generate mockgen -package mocks -destination mocks/mocks_job.go distributedSearchEngine/services/pagerank/dbspgraph/job Runner
+//go:generate mockgen -package mocks -destination mocks/mocks_serializer.go github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph Serializer
+//go:generate mockgen -package mocks -destination mocks/mocks_job.go github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/job Runner
 
 // Serializer is implemented by types that can serialize aggregator and
 // graph messages from and to an any.Any value.

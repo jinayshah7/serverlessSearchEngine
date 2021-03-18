@@ -4,12 +4,12 @@ import (
 	"context"
 	"sync"
 
-	"distributedSearchEngine/services/pagerank/bspgraph"
-	"distributedSearchEngine/services/pagerank/dbspgraph/job"
-	"distributedSearchEngine/services/pagerank/dbspgraph/partition"
-	"distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/job"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/partition"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )

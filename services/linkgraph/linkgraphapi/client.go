@@ -5,13 +5,13 @@ import (
 	"io"
 	"time"
 
-	"distributedSearchEngine/apis/linkgraphapi/proto"
-	"distributedSearchEngine/services/linkgraph/graph"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mock.go distributedSearchEngine/services/linksrus/linkgraphapi/proto LinkGraphClient,LinkGraph_LinksClient,LinkGraph_EdgesClient
+//go:generate mockgen -package mocks -destination mocks/mock.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/linkgraphapi/proto LinkGraphClient,LinkGraph_LinksClient,LinkGraph_EdgesClient
 
 // LinkGraphClient provides an API compatible with the graph.Graph interface
 // for accessing graph instances exposed by a remote gRPC server.

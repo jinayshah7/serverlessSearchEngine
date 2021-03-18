@@ -1,7 +1,7 @@
 package bspgraph
 
 import (
-	"distributedSearchEngine/services/pagerank/bspgraph/message"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph/message"
 )
 
 // Aggregator is implemented by types that provide concurrent-safe aggregation

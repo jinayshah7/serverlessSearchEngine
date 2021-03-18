@@ -3,9 +3,9 @@ package dbspgraph
 import (
 	"context"
 
-	"distributedSearchEngine/services/pagerank/bspgraph"
-	"distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"golang.org/x/xerrors"
 )
 

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/elastic/go-elasticsearch"
 	"github.com/elastic/go-elasticsearch/esapi"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 	"golang.org/x/xerrors"
 )
 

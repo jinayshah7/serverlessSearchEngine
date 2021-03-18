@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 	"golang.org/x/xerrors"
 	gc "gopkg.in/check.v1"
 )

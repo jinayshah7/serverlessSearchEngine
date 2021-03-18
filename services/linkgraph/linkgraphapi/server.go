@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"distributedSearchEngine/apis/linkgraphapi/proto"
-	"distributedSearchEngine/services/linkgraph/graph"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
 )
 
 var _ proto.LinkGraphServer = (*LinkGraphServer)(nil)

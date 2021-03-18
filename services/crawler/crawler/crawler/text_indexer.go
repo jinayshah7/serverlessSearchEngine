@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"distributedSearchEngine/services/crawler/pipeline"
-	"distributedSearchEngine/services/textindexer/index"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 )
 
 type textIndexer struct {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"distributedSearchEngine/services/crawler/pipeline"
-	"distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
 )
 
 type graphUpdater struct {

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"regexp"
 
-	"distributedSearchEngine/services/crawler/pipeline"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
 )
 
 var (

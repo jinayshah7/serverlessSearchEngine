@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"distributedSearchEngine/services/crawler/pipeline"
-	"distributedSearchEngine/services/linkgraph/graph"
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks.go distributedSearchEngine/services/crawler URLGetter,PrivateNetworkDetector,Graph,Indexer
+//go:generate mockgen -package mocks -destination mocks/mocks.go github.com/jinayshah7/distributedSearchEngine/services/crawler URLGetter,PrivateNetworkDetector,Graph,Indexer
 
 // URLGetter is implemented by objects that can perform HTTP GET requests.
 type URLGetter interface {

@@ -4,14 +4,14 @@ import (
 	"context"
 	"io"
 
-	"distributedSearchEngine/apis/textindexerapi/proto"
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi/proto"
 	"golang.org/x/xerrors"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mock.go distributedSearchEngine/services/linksrus/textindexerapi/proto TextIndexerClient,TextIndexer_SearchClient
+//go:generate mockgen -package mocks -destination mocks/mock.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/textindexerapi/proto TextIndexerClient,TextIndexer_SearchClient
 
 // TextIndexerClient provides an API compatible with the index.Indexer interface
 // for accessing a text indexer instances exposed by a remote gRPC server.

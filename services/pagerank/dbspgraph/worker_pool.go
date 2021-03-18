@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks_api.go distributedSearchEngine/services/pagerank/dbspgraph/proto JobQueue_JobStreamServer
+//go:generate mockgen -package mocks -destination mocks/mocks_api.go github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto JobQueue_JobStreamServer
 
 // workerPool stores remote worker connections until they get reserved for a job.
 type workerPool struct {

@@ -1,6 +1,6 @@
 package job
 
-import "distributedSearchEngine/services/pagerank/bspgraph"
+import "github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
 
 // Runner is implemented by types that can execute distributed bspgraph jobs.
 type Runner interface {

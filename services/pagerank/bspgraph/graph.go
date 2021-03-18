@@ -4,7 +4,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"distributedSearchEngine/services/pagerank/bspgraph/message"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph/message"
 	"golang.org/x/xerrors"
 )
 

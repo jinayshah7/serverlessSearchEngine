@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"distributedSearchEngine/services/pagerank/dbspgraph/proto"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

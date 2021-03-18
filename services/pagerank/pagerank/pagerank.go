@@ -5,19 +5,19 @@ import (
 	"io/ioutil"
 	"time"
 
-	"distributedSearchEngine/services/crawler/partition"
-	"distributedSearchEngine/services/linkgraph/graph"
-	"distributedSearchEngine/services/pagerank/bspgraph"
-	pr "distributedSearchEngine/services/pagerank/helpers"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/partition"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
+	pr "github.com/jinayshah7/distributedSearchEngine/services/pagerank/helpers"
 	"github.com/juju/clock"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks.go distributedSearchEngine/services/linksrus/service/pagerank GraphAPI,IndexAPI
-//go:generate mockgen -package mocks -destination mocks/mock_iterator.go distributedSearchEngine/services/linkgraph/graph LinkIterator,EdgeIterator
+//go:generate mockgen -package mocks -destination mocks/mocks.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/service/pagerank GraphAPI,IndexAPI
+//go:generate mockgen -package mocks -destination mocks/mock_iterator.go github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph LinkIterator,EdgeIterator
 
 // GraphAPI defines as set of API methods for fetching the links and edges from
 // the link graph.

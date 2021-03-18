@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	"distributedSearchEngine/services/linkgraph/graph"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
 	"github.com/lib/pq"
 	"golang.org/x/xerrors"
 )

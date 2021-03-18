@@ -5,10 +5,10 @@ import (
 	"sync"
 	"time"
 
-	"distributedSearchEngine/services/pagerank/dbspgraph/job"
-	"distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/job"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"

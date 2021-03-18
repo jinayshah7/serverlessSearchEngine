@@ -3,8 +3,8 @@ package helpers
 import (
 	"math"
 
-	"distributedSearchEngine/services/pagerank/bspgraph"
-	"distributedSearchEngine/services/pagerank/bspgraph/message"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph/message"
 )
 
 // IncomingScoreMessage is used for distributing PageRank scores to neighbors.

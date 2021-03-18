@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"distributedSearchEngine/services/crawler/pipeline"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
 )
 
 var (

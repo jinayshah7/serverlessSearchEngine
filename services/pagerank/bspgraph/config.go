@@ -1,8 +1,8 @@
 package bspgraph
 
 import (
-	"distributedSearchEngine/services/pagerank/bspgraph/message"
 	multierror "github.com/hashicorp/go-multierror"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph/message"
 	"golang.org/x/xerrors"
 )
 

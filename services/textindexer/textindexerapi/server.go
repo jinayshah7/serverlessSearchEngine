@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"distributedSearchEngine/apis/textindexerapi/proto"
-	"distributedSearchEngine/services/textindexer/index"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/uuid"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
+	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi/proto"
 )
 
 var _ proto.TextIndexerServer = (*TextIndexerServer)(nil)

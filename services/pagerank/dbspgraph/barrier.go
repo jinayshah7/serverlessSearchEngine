@@ -3,7 +3,7 @@ package dbspgraph
 import (
 	"context"
 
-	"distributedSearchEngine/services/pagerank/dbspgraph/proto"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
 	"golang.org/x/xerrors"
 )
 

@@ -3,8 +3,8 @@ package helpers
 import (
 	"context"
 
-	"distributedSearchEngine/services/pagerank/bspgraph"
-	"distributedSearchEngine/services/pagerank/bspgraph/aggregator"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
+	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph/aggregator"
 	"golang.org/x/xerrors"
 )
 

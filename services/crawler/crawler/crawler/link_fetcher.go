@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"distributedSearchEngine/services/crawler/pipeline"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/pipeline"
 )
 
 var _ pipeline.Processor = (*linkFetcher)(nil)
