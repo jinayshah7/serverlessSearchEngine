@@ -1,4 +1,4 @@
-# Distributed Search Engine
+# Distributed Search Engine (Google Search Clone)
 
 ### Feature Wishlist
 - Rendering dynamic webpages - Right now this only renders the html that the website returns, it's not running nay javascript.
