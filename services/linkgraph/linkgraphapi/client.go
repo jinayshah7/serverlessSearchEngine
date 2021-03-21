@@ -11,8 +11,6 @@ import (
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mock.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/linkgraphapi/proto LinkGraphClient,LinkGraph_LinksClient,LinkGraph_EdgesClient
-
 // LinkGraphClient provides an API compatible with the graph.Graph interface
 // for accessing graph instances exposed by a remote gRPC server.
 type LinkGraphClient struct {

@@ -8,8 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
-	crawlerpipeline "github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler/crawler"
-	"github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler/crawler/privnet"
+	"github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler/privnet"
 	"github.com/jinayshah7/distributedSearchEngine/services/crawler/partition"
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
 	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
@@ -17,9 +16,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
-
-//go:generate mockgen -package mocks -destination mocks/mocks.go github.com/jinayshah7/distributedSearchEngine/services/linksrus/service/crawler GraphAPI,IndexAPI
-//go:generate mockgen -package mocks -destination mocks/mock_iterator.go github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph LinkIterator
 
 // GraphAPI defines as set of API methods for accessing the link graph.
 type GraphAPI interface {
@@ -45,11 +41,11 @@ type Config struct {
 	// An API for detecting private network addresses. If not specified,
 	// a default implementation that handles the private network ranges
 	// defined in RFC1918 will be used instead.
-	PrivateNetworkDetector crawlerpipeline.PrivateNetworkDetector
+	PrivateNetworkDetector PrivateNetworkDetector
 
 	// An API for performing HTTP requests. If not specified,
 	// http.DefaultClient will be used instead.
-	URLGetter crawlerpipeline.URLGetter
+	URLGetter URLGetter
 
 	// An API for detecting the partition assignments for this service.
 	PartitionDetector partition.Detector
@@ -110,7 +106,7 @@ func (cfg *Config) validate() error {
 // Service implements the web-crawler component for the Links 'R' Us project.
 type Service struct {
 	cfg     Config
-	crawler *crawlerpipeline.Crawler
+	crawler *Crawler
 }
 
 // NewService creates a new crawler service instance with the specified config.
@@ -121,7 +117,7 @@ func NewService(cfg Config) (*Service, error) {
 
 	return &Service{
 		cfg: cfg,
-		crawler: crawlerpipeline.NewCrawler(crawlerpipeline.Config{
+		crawler: NewCrawler(Configg{
 			PrivateNetworkDetector: cfg.PrivateNetworkDetector,
 			URLGetter:              cfg.URLGetter,
 			Graph:                  cfg.GraphAPI,

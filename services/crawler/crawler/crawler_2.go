@@ -11,8 +11,6 @@ import (
 	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks.go github.com/jinayshah7/distributedSearchEngine/services/crawler URLGetter,PrivateNetworkDetector,Graph,Indexer
-
 // URLGetter is implemented by objects that can perform HTTP GET requests.
 type URLGetter interface {
 	Get(url string) (*http.Response, error)
@@ -46,8 +44,8 @@ type Indexer interface {
 	Index(doc *index.Document) error
 }
 
-// Config encapsulates the configuration options for creating a new Crawler.
-type Config struct {
+// Configg encapsulates the Configguration options for creating a new Crawler.
+type Configg struct {
 	// A PrivateNetworkDetector instance
 	PrivateNetworkDetector PrivateNetworkDetector
 
@@ -78,7 +76,7 @@ type Crawler struct {
 }
 
 // NewCrawler returns a new crawler instance.
-func NewCrawler(cfg Config) *Crawler {
+func NewCrawler(cfg Configg) *Crawler {
 	return &Crawler{
 		p: assembleCrawlerPipeline(cfg),
 	}
@@ -86,7 +84,7 @@ func NewCrawler(cfg Config) *Crawler {
 
 // assembleCrawlerPipeline creates the various stages of a crawler pipeline
 // using the options in cfg and assembles them into a pipeline instance.
-func assembleCrawlerPipeline(cfg Config) *pipeline.Pipeline {
+func assembleCrawlerPipeline(cfg Configg) *pipeline.Pipeline {
 	return pipeline.New(
 		pipeline.FixedWorkerPool(
 			newLinkFetcher(cfg.URLGetter, cfg.PrivateNetworkDetector),

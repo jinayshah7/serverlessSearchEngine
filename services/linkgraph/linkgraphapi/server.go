@@ -12,20 +12,19 @@ import (
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
 )
 
+// Taking the requirements of the gRPC server and mapping them to the CockroachDB graph functions
+
+// Compile time check to make sure LinkGraphServer implements the interface specified by the gRPC service
 var _ proto.LinkGraphServer = (*LinkGraphServer)(nil)
 
-// LinkGraphServer provides a gRPC layer for accessing a link graph.
 type LinkGraphServer struct {
 	g graph.Graph
 }
 
-// NewLinkGraphServer returns a new server instance that uses the provided
-// graph as its backing store.
 func NewLinkGraphServer(g graph.Graph) *LinkGraphServer {
 	return &LinkGraphServer{g: g}
 }
 
-// UpsertLink inserts or updates a link.
 func (s *LinkGraphServer) UpsertLink(_ context.Context, req *proto.Link) (*proto.Link, error) {
 	var (
 		err  error
@@ -49,7 +48,6 @@ func (s *LinkGraphServer) UpsertLink(_ context.Context, req *proto.Link) (*proto
 	return req, nil
 }
 
-// UpsertEdge inserts or updates an edge.
 func (s *LinkGraphServer) UpsertEdge(_ context.Context, req *proto.Edge) (*proto.Edge, error) {
 	edge := graph.Edge{
 		ID:  uuidFromBytes(req.Uuid),
@@ -68,8 +66,6 @@ func (s *LinkGraphServer) UpsertEdge(_ context.Context, req *proto.Edge) (*proto
 	return req, nil
 }
 
-// Links streams the set of links whose IDs belong to the specified partition
-// range and were accessed before the specified timestamp.
 func (s *LinkGraphServer) Links(idRange *proto.Range, w proto.LinkGraph_LinksServer) error {
 	accessedBefore, err := ptypes.Timestamp(idRange.Filter)
 	if err != nil && idRange.Filter != nil {
@@ -111,8 +107,6 @@ func (s *LinkGraphServer) Links(idRange *proto.Range, w proto.LinkGraph_LinksSer
 	return it.Close()
 }
 
-// Edges streams the set of edges whose IDs belong to the specified partition
-// range and were updated before the specified timestamp.
 func (s *LinkGraphServer) Edges(idRange *proto.Range, w proto.LinkGraph_EdgesServer) error {
 	updatedBefore, err := ptypes.Timestamp(idRange.Filter)
 	if err != nil && idRange.Filter != nil {
@@ -155,8 +149,6 @@ func (s *LinkGraphServer) Edges(idRange *proto.Range, w proto.LinkGraph_EdgesSer
 	return it.Close()
 }
 
-// RemoveStaleEdges removes any edge that originates from the specified
-// link ID and was updated before the specified timestamp.
 func (s *LinkGraphServer) RemoveStaleEdges(_ context.Context, req *proto.RemoveStaleEdgesQuery) (*empty.Empty, error) {
 	updatedBefore, err := ptypes.Timestamp(req.UpdatedBefore)
 	if err != nil {

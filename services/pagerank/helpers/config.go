@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	multierror "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/xerrors"
 )
 

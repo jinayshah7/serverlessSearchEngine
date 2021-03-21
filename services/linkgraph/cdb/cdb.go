@@ -31,14 +31,13 @@ RETURNING id, updated_at
 	_ graph.Graph = (*CockroachDBGraph)(nil)
 )
 
-// CockroachDBGraph implements a graph that persists its links and edges to a
-// cockroachdb instance.
+// CockroachDB specific implementation of the graph. Graph defined what a graph should be able
+// to do. This implementation meets those requirements.
+
 type CockroachDBGraph struct {
 	db *sql.DB
 }
 
-// NewCockroachDbGraph returns a CockroachDbGraph instance that connects to the cockroachdb
-// instance specified by dsn.
 func NewCockroachDbGraph(dsn string) (*CockroachDBGraph, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -48,12 +47,10 @@ func NewCockroachDbGraph(dsn string) (*CockroachDBGraph, error) {
 	return &CockroachDBGraph{db: db}, nil
 }
 
-// Close terminates the connection to the backing cockroachdb instance.
 func (c *CockroachDBGraph) Close() error {
 	return c.db.Close()
 }
 
-// UpsertLink creates a new link or updates an existing link.
 func (c *CockroachDBGraph) UpsertLink(link *graph.Link) error {
 	row := c.db.QueryRow(upsertLinkQuery, link.URL, link.RetrievedAt.UTC())
 	if err := row.Scan(&link.ID, &link.RetrievedAt); err != nil {
@@ -64,7 +61,6 @@ func (c *CockroachDBGraph) UpsertLink(link *graph.Link) error {
 	return nil
 }
 
-// FindLink looks up a link by its ID.
 func (c *CockroachDBGraph) FindLink(id uuid.UUID) (*graph.Link, error) {
 	row := c.db.QueryRow(findLinkQuery, id)
 	link := &graph.Link{ID: id}
@@ -80,8 +76,6 @@ func (c *CockroachDBGraph) FindLink(id uuid.UUID) (*graph.Link, error) {
 	return link, nil
 }
 
-// Links returns an iterator for the set of links whose IDs belong to the
-// [fromID, toID) range and were last accessed before the provided value.
 func (c *CockroachDBGraph) Links(fromID, toID uuid.UUID, accessedBefore time.Time) (graph.LinkIterator, error) {
 	rows, err := c.db.Query(linksInPartitionQuery, fromID, toID, accessedBefore.UTC())
 	if err != nil {
@@ -91,7 +85,6 @@ func (c *CockroachDBGraph) Links(fromID, toID uuid.UUID, accessedBefore time.Tim
 	return &linkIterator{rows: rows}, nil
 }
 
-// UpsertEdge creates a new edge or updates an existing edge.
 func (c *CockroachDBGraph) UpsertEdge(edge *graph.Edge) error {
 	row := c.db.QueryRow(upsertEdgeQuery, edge.Src, edge.Dst)
 	if err := row.Scan(&edge.ID, &edge.UpdatedAt); err != nil {
@@ -105,9 +98,6 @@ func (c *CockroachDBGraph) UpsertEdge(edge *graph.Edge) error {
 	return nil
 }
 
-// Edges returns an iterator for the set of edges whose source vertex IDs
-// belong to the [fromID, toID) range and were last updated before the provided
-// value.
 func (c *CockroachDBGraph) Edges(fromID, toID uuid.UUID, updatedBefore time.Time) (graph.EdgeIterator, error) {
 	rows, err := c.db.Query(edgesInPartitionQuery, fromID, toID, updatedBefore.UTC())
 	if err != nil {
@@ -117,8 +107,6 @@ func (c *CockroachDBGraph) Edges(fromID, toID uuid.UUID, updatedBefore time.Time
 	return &edgeIterator{rows: rows}, nil
 }
 
-// RemoveStaleEdges removes any edge that originates from the specified link ID
-// and was updated before the specified timestamp.
 func (c *CockroachDBGraph) RemoveStaleEdges(fromID uuid.UUID, updatedBefore time.Time) error {
 	_, err := c.db.Exec(removeStaleEdgesQuery, fromID, updatedBefore.UTC())
 	if err != nil {
@@ -128,8 +116,6 @@ func (c *CockroachDBGraph) RemoveStaleEdges(fromID uuid.UUID, updatedBefore time
 	return nil
 }
 
-// isForeignKeyViolationError returns true if err indicates a foreign key
-// constraint violation.
 func isForeignKeyViolationError(err error) bool {
 	pqErr, valid := err.(*pq.Error)
 	if !valid {

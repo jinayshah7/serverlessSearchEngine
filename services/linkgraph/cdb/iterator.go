@@ -7,14 +7,12 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// linkIterator is a graph.LinkIterator implementation for the cdb graph.
 type linkIterator struct {
 	rows        *sql.Rows
 	lastErr     error
 	latchedLink *graph.Link
 }
 
-// Next implements graph.LinkIterator.
 func (i *linkIterator) Next() bool {
 	if i.lastErr != nil || !i.rows.Next() {
 		return false
@@ -31,12 +29,10 @@ func (i *linkIterator) Next() bool {
 	return true
 }
 
-// Error implements graph.LinkIterator.
 func (i *linkIterator) Error() error {
 	return i.lastErr
 }
 
-// Close implements graph.LinkIterator.
 func (i *linkIterator) Close() error {
 	err := i.rows.Close()
 	if err != nil {
@@ -45,19 +41,16 @@ func (i *linkIterator) Close() error {
 	return nil
 }
 
-// Link implements graph.LinkIterator.
 func (i *linkIterator) Link() *graph.Link {
 	return i.latchedLink
 }
 
-// edgeIterator is a graph.EdgeIterator implementation for the cdb graph.
 type edgeIterator struct {
 	rows        *sql.Rows
 	lastErr     error
 	latchedEdge *graph.Edge
 }
 
-// Next implements graph.EdgeIterator.
 func (i *edgeIterator) Next() bool {
 	if i.lastErr != nil || !i.rows.Next() {
 		return false
@@ -74,12 +67,10 @@ func (i *edgeIterator) Next() bool {
 	return true
 }
 
-// Error implements graph.EdgeIterator.
 func (i *edgeIterator) Error() error {
 	return i.lastErr
 }
 
-// Close implements graph.EdgeIterator.
 func (i *edgeIterator) Close() error {
 	err := i.rows.Close()
 	if err != nil {
@@ -88,7 +79,6 @@ func (i *edgeIterator) Close() error {
 	return nil
 }
 
-// Edge implements graph.EdgeIterator.
 func (i *edgeIterator) Edge() *graph.Edge {
 	return i.latchedEdge
 }
