@@ -3,15 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/http"
-	_ "net/http/pprof"
-	"net/url"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/cdb"
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi"
@@ -20,11 +11,15 @@ import (
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
+	"net"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"sync"
 )
 
 var (
 	appName = "services-linkgraph"
-	appSha  = "populated-at-link-time"
 	logger  *logrus.Entry
 )
 
@@ -34,7 +29,6 @@ func main() {
 	rootLogger.SetFormatter(new(logrus.JSONFormatter))
 	logger = rootLogger.WithFields(logrus.Fields{
 		"app":  appName,
-		"sha":  appSha,
 		"host": host,
 	})
 
@@ -48,13 +42,12 @@ func main() {
 func makeApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = appName
-	app.Version = appSha
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "link-graph-uri",
-			Value:  "in-memory://",
+			Value:  "",
 			EnvVar: "LINK_GRAPH_URI",
-			Usage:  "The URI for connecting to the link-graph (supported URIs: in-memory://, postgresql://user@host:26257/linkgraph?sslmode=disable)",
+			Usage:  "The URI for connecting to the link-graph",
 		},
 		cli.IntFlag{
 			Name:   "grpc-port",
@@ -75,7 +68,7 @@ func makeApp() *cli.App {
 
 func runMain(appCtx *cli.Context) error {
 	var wg sync.WaitGroup
-	ctx, cancelFn := context.WithCancel(context.Background())
+	_, cancelFn := context.WithCancel(context.Background())
 	defer cancelFn()
 
 	graph, err := getLinkGraph(appCtx.String("link-graph-uri"))
@@ -83,7 +76,6 @@ func runMain(appCtx *cli.Context) error {
 		return err
 	}
 
-	// Start gRPC server
 	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", appCtx.Int("grpc-port")))
 	if err != nil {
 		return err
@@ -99,7 +91,6 @@ func runMain(appCtx *cli.Context) error {
 		_ = srv.Serve(grpcListener)
 	}()
 
-	// Start pprof server
 	pprofListener, err := net.Listen("tcp", fmt.Sprintf(":%d", appCtx.Int("pprof-port")))
 	if err != nil {
 		return err
@@ -114,21 +105,6 @@ func runMain(appCtx *cli.Context) error {
 		_ = srv.Serve(pprofListener)
 	}()
 
-	// Start signal watcher
-	go func() {
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGHUP)
-		select {
-		case s := <-sigCh:
-			logger.WithField("signal", s.String()).Infof("shutting down due to signal")
-			_ = grpcListener.Close()
-			_ = pprofListener.Close()
-			cancelFn()
-		case <-ctx.Done():
-		}
-	}()
-
-	// Keep running until we receive a signal
 	wg.Wait()
 	return nil
 }
@@ -137,17 +113,5 @@ func getLinkGraph(linkGraphURI string) (graph.Graph, error) {
 	if linkGraphURI == "" {
 		return nil, xerrors.Errorf("link graph URI must be specified with --link-graph-uri")
 	}
-
-	uri, err := url.Parse(linkGraphURI)
-	if err != nil {
-		return nil, xerrors.Errorf("could not parse link graph URI: %w", err)
-	}
-
-	switch uri.Scheme {
-	case "postgresql":
-		logger.Info("using CDB graph")
-		return cdb.NewCockroachDbGraph(linkGraphURI)
-	default:
-		return nil, xerrors.Errorf("unsupported link graph URI scheme: %q", uri.Scheme)
-	}
+	return cdb.NewCockroachDbGraph(linkGraphURI)
 }

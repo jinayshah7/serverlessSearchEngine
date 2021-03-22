@@ -11,28 +11,22 @@ import (
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
 )
 
-// LinkGraphClient provides an API compatible with the graph.Graph interface
-// for accessing graph instances exposed by a remote gRPC server.
 type LinkGraphClient struct {
-	ctx context.Context
-	cli proto.LinkGraphClient
+	ctx    context.Context
+	client proto.LinkGraphClient
 }
 
-// NewLinkGraphClient returns a new client instance that implements a subset
-// of the graph.Graph interface by delegating methods to a graph instance
-// exposed by a remote gRPC sever.
 func NewLinkGraphClient(ctx context.Context, rpcClient proto.LinkGraphClient) *LinkGraphClient {
-	return &LinkGraphClient{ctx: ctx, cli: rpcClient}
+	return &LinkGraphClient{ctx: ctx, client: rpcClient}
 }
 
-// UpsertLink creates a new link or updates an existing link.
 func (c *LinkGraphClient) UpsertLink(link *graph.Link) error {
 	req := &proto.Link{
 		Uuid:        link.ID[:],
 		Url:         link.URL,
 		RetrievedAt: timeToProto(link.RetrievedAt),
 	}
-	res, err := c.cli.UpsertLink(c.ctx, req)
+	res, err := c.client.UpsertLink(c.ctx, req)
 	if err != nil {
 		return err
 	}
@@ -46,14 +40,13 @@ func (c *LinkGraphClient) UpsertLink(link *graph.Link) error {
 	return nil
 }
 
-// UpsertEdge creates a new edge or updates an existing edge.
 func (c *LinkGraphClient) UpsertEdge(edge *graph.Edge) error {
 	req := &proto.Edge{
 		Uuid:    edge.ID[:],
 		SrcUuid: edge.Src[:],
 		DstUuid: edge.Dst[:],
 	}
-	res, err := c.cli.UpsertEdge(c.ctx, req)
+	res, err := c.client.UpsertEdge(c.ctx, req)
 	if err != nil {
 		return err
 	}
@@ -66,8 +59,6 @@ func (c *LinkGraphClient) UpsertEdge(edge *graph.Edge) error {
 	return nil
 }
 
-// Links returns an iterator for the set of links whose IDs belong to the
-// [fromID, toID) range and were last accessed before the provided value.
 func (c *LinkGraphClient) Links(fromID, toID uuid.UUID, accessedBefore time.Time) (graph.LinkIterator, error) {
 	filter, err := ptypes.TimestampProto(accessedBefore)
 	if err != nil {
@@ -81,7 +72,7 @@ func (c *LinkGraphClient) Links(fromID, toID uuid.UUID, accessedBefore time.Time
 	}
 
 	ctx, cancelFn := context.WithCancel(c.ctx)
-	stream, err := c.cli.Links(ctx, req)
+	stream, err := c.client.Links(ctx, req)
 	if err != nil {
 		cancelFn()
 		return nil, err
@@ -90,9 +81,6 @@ func (c *LinkGraphClient) Links(fromID, toID uuid.UUID, accessedBefore time.Time
 	return &linkIterator{stream: stream, cancelFn: cancelFn}, nil
 }
 
-// Edges returns an iterator for the set of edges whose source vertex IDs
-// belong to the [fromID, toID) range and were last updated before the provided
-// value.
 func (c *LinkGraphClient) Edges(fromID, toID uuid.UUID, updatedBefore time.Time) (graph.EdgeIterator, error) {
 	filter, err := ptypes.TimestampProto(updatedBefore)
 	if err != nil {
@@ -106,7 +94,7 @@ func (c *LinkGraphClient) Edges(fromID, toID uuid.UUID, updatedBefore time.Time)
 	}
 
 	ctx, cancelFn := context.WithCancel(c.ctx)
-	stream, err := c.cli.Edges(ctx, req)
+	stream, err := c.client.Edges(ctx, req)
 	if err != nil {
 		cancelFn()
 		return nil, err
@@ -115,15 +103,13 @@ func (c *LinkGraphClient) Edges(fromID, toID uuid.UUID, updatedBefore time.Time)
 	return &edgeIterator{stream: stream, cancelFn: cancelFn}, nil
 }
 
-// RemoveStaleEdges removes any edge that originates from the specified link ID
-// and was updated before the specified timestamp.
 func (c *LinkGraphClient) RemoveStaleEdges(from uuid.UUID, updatedBefore time.Time) error {
 	req := &proto.RemoveStaleEdgesQuery{
 		FromUuid:      from[:],
 		UpdatedBefore: timeToProto(updatedBefore),
 	}
 
-	_, err := c.cli.RemoveStaleEdges(c.ctx, req)
+	_, err := c.client.RemoveStaleEdges(c.ctx, req)
 	return err
 }
 
@@ -137,8 +123,6 @@ type linkIterator struct {
 	cancelFn func()
 }
 
-// Next advances the iterator. If no more items are available or an
-// error occurs, calls to Next() return false.
 func (it *linkIterator) Next() bool {
 	res, err := it.stream.Recv()
 	if err != nil {
@@ -164,13 +148,10 @@ func (it *linkIterator) Next() bool {
 	return true
 }
 
-// Error returns the last error encountered by the iterator.
 func (it *linkIterator) Error() error { return it.lastErr }
 
-// Link returns the currently fetched link object.
 func (it *linkIterator) Link() *graph.Link { return it.next }
 
-// Close releases any resources associated with an iterator.
 func (it *linkIterator) Close() error {
 	it.cancelFn()
 	return nil
@@ -186,8 +167,6 @@ type edgeIterator struct {
 	cancelFn func()
 }
 
-// Next advances the iterator. If no more items are available or an
-// error occurs, calls to Next() return false.
 func (it *edgeIterator) Next() bool {
 	res, err := it.stream.Recv()
 	if err != nil {
@@ -214,13 +193,10 @@ func (it *edgeIterator) Next() bool {
 	return true
 }
 
-// Error returns the last error encountered by the iterator.
 func (it *edgeIterator) Error() error { return it.lastErr }
 
-// Edge returns the currently fetched edge object.
 func (it *edgeIterator) Edge() *graph.Edge { return it.next }
 
-// Close releases any resources associated with an iterator.
 func (it *edgeIterator) Close() error {
 	it.cancelFn()
 	return nil

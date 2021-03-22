@@ -3,16 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/http"
-	_ "net/http/pprof"
-	"net/url"
-	"os"
-	"os/signal"
-	"strings"
-	"sync"
-	"syscall"
-
 	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/es"
 	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi"
@@ -21,11 +11,17 @@ import (
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
+	"net"
+	"net/http"
+	_ "net/http/pprof"
+	"net/url"
+	"os"
+	"strings"
+	"sync"
 )
 
 var (
 	appName = "services-textindexer"
-	appSha  = "populated-at-link-time"
 	logger  *logrus.Entry
 )
 
@@ -35,7 +31,6 @@ func main() {
 	rootLogger.SetFormatter(new(logrus.JSONFormatter))
 	logger = rootLogger.WithFields(logrus.Fields{
 		"app":  appName,
-		"sha":  appSha,
 		"host": host,
 	})
 
@@ -49,13 +44,12 @@ func main() {
 func makeApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = appName
-	app.Version = appSha
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "text-indexer-uri",
-			Value:  "in-memory://",
+			Value:  "",
 			EnvVar: "TEXT_INDEXER_URI",
-			Usage:  "The URI for connecting to the text indexer (supported URIs: in-memory://, es://node1:9200,...,nodeN:9200)",
+			Usage:  "The URI for connecting to the text indexer",
 		},
 		cli.IntFlag{
 			Name:   "grpc-port",
@@ -76,7 +70,7 @@ func makeApp() *cli.App {
 
 func runMain(appCtx *cli.Context) error {
 	var wg sync.WaitGroup
-	ctx, cancelFn := context.WithCancel(context.Background())
+	_, cancelFn := context.WithCancel(context.Background())
 	defer cancelFn()
 
 	indexer, err := getTextIndexer(appCtx.String("text-indexer-uri"))
@@ -84,7 +78,6 @@ func runMain(appCtx *cli.Context) error {
 		return err
 	}
 
-	// Start gRPC server
 	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", appCtx.Int("grpc-port")))
 	if err != nil {
 		return err
@@ -100,7 +93,6 @@ func runMain(appCtx *cli.Context) error {
 		_ = srv.Serve(grpcListener)
 	}()
 
-	// Start pprof server
 	pprofListener, err := net.Listen("tcp", fmt.Sprintf(":%d", appCtx.Int("pprof-port")))
 	if err != nil {
 		return err
@@ -115,21 +107,6 @@ func runMain(appCtx *cli.Context) error {
 		_ = srv.Serve(pprofListener)
 	}()
 
-	// Start signal watcher
-	go func() {
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGHUP)
-		select {
-		case s := <-sigCh:
-			logger.WithField("signal", s.String()).Infof("shutting down due to signal")
-			_ = grpcListener.Close()
-			_ = pprofListener.Close()
-			cancelFn()
-		case <-ctx.Done():
-		}
-	}()
-
-	// Keep running until we receive a signal
 	wg.Wait()
 	return nil
 }
@@ -144,15 +121,11 @@ func getTextIndexer(textIndexerURI string) (index.Indexer, error) {
 		return nil, xerrors.Errorf("could not parse text indexer URI: %w", err)
 	}
 
-	switch uri.Scheme {
-	case "es":
-		nodes := strings.Split(uri.Host, ",")
-		for i := 0; i < len(nodes); i++ {
-			nodes[i] = "http://" + nodes[i]
-		}
-		logger.Info("using ES indexer")
-		return es.NewElasticSearchIndexer(nodes, false)
-	default:
-		return nil, xerrors.Errorf("unsupported link graph URI scheme: %q", uri.Scheme)
+	nodes := strings.Split(uri.Host, ",")
+	for i := 0; i < len(nodes); i++ {
+		nodes[i] = "http://" + nodes[i]
 	}
+	logger.Info("using ES indexer")
+	return es.NewElasticSearchIndexer(nodes, false)
+
 }

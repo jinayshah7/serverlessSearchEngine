@@ -13,8 +13,8 @@ import (
 )
 
 // Taking the requirements of the gRPC server and mapping them to the CockroachDB graph functions
-
-// Compile time check to make sure LinkGraphServer implements the interface specified by the gRPC service
+// Compile time check to make sure LinkGraphServer implements the interface specified by the
+// gRPC service
 var _ proto.LinkGraphServer = (*LinkGraphServer)(nil)
 
 type LinkGraphServer struct {

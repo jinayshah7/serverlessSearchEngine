@@ -41,10 +41,8 @@ service LinkGraph {
 
   rpc UpsertEdge(Edge) returns (Edge);
 
-  // Links streams the set of links in the specified ID range.
   rpc Links(Range) returns (stream Link);
 
-  // Edges streams the set of edges in the specified ID range.
   rpc Edges(Range) returns (stream Edge);
 
   rpc RemoveStaleEdges(RemoveStaleEdgesQuery) returns (google.protobuf.Empty);
