@@ -29,18 +29,18 @@ type Link struct {
 }
 
 type Edge struct {
-	ID  uuid.UUID
-	Src uuid.UUID
-	Dst uuid.UUID
+	ID          uuid.UUID
+	Source      uuid.UUID
+	Destination uuid.UUID
 
 	UpdatedAt time.Time
 }
 
 type Graph interface {
-	UpsertLink(link *Link) error
+	SaveLink(link *Link) error
+	SaveEdge(edge *Edge) error
 	FindLink(id uuid.UUID) (*Link, error)
 	Links(fromID, toID uuid.UUID, retrievedBefore time.Time) (LinkIterator, error)
-	UpsertEdge(edge *Edge) error
 	Edges(fromID, toID uuid.UUID, updatedBefore time.Time) (EdgeIterator, error)
-	RemoveStaleEdges(fromID uuid.UUID, updatedBefore time.Time) error
+	RemoveOldEdges(fromID uuid.UUID, updatedBefore time.Time) error
 }
