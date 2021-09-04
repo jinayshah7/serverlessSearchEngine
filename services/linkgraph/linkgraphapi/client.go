@@ -20,13 +20,13 @@ func NewLinkGraphClient(ctx context.Context, rpcClient proto.LinkGraphClient) *L
 	return &LinkGraphClient{ctx: ctx, client: rpcClient}
 }
 
-func (c *LinkGraphClient) UpsertLink(link *graph.Link) error {
+func (c *LinkGraphClient) SaveLink(link *graph.Link) error {
 	req := &proto.Link{
 		Uuid:        link.ID[:],
 		Url:         link.URL,
 		RetrievedAt: timeToProto(link.RetrievedAt),
 	}
-	res, err := c.client.UpsertLink(c.ctx, req)
+	res, err := c.client.SaveLink(c.ctx, req)
 	if err != nil {
 		return err
 	}
@@ -40,13 +40,13 @@ func (c *LinkGraphClient) UpsertLink(link *graph.Link) error {
 	return nil
 }
 
-func (c *LinkGraphClient) UpsertEdge(edge *graph.Edge) error {
+func (c *LinkGraphClient) SaveEdge(edge *graph.Edge) error {
 	req := &proto.Edge{
 		Uuid:    edge.ID[:],
 		SrcUuid: edge.Src[:],
 		DstUuid: edge.Dst[:],
 	}
-	res, err := c.client.UpsertEdge(c.ctx, req)
+	res, err := c.client.SaveEdge(c.ctx, req)
 	if err != nil {
 		return err
 	}
@@ -103,13 +103,13 @@ func (c *LinkGraphClient) Edges(fromID, toID uuid.UUID, updatedBefore time.Time)
 	return &edgeIterator{stream: stream, cancelFn: cancelFn}, nil
 }
 
-func (c *LinkGraphClient) RemoveStaleEdges(from uuid.UUID, updatedBefore time.Time) error {
+func (c *LinkGraphClient) RemoveOldEdges(from uuid.UUID, updatedBefore time.Time) error {
 	req := &proto.RemoveStaleEdgesQuery{
 		FromUuid:      from[:],
 		UpdatedBefore: timeToProto(updatedBefore),
 	}
 
-	_, err := c.client.RemoveStaleEdges(c.ctx, req)
+	_, err := c.client.RemoveOldEdges(c.ctx, req)
 	return err
 }
 
@@ -162,8 +162,6 @@ type edgeIterator struct {
 	next    *graph.Edge
 	lastErr error
 
-	// A function to cancel the context used to perform the streaming RPC. It
-	// allows us to abort server-streaming calls from the client side.
 	cancelFn func()
 }
 

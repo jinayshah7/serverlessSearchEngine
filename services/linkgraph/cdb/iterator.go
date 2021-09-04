@@ -2,9 +2,9 @@ package cdb
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
-	"golang.org/x/xerrors"
 )
 
 type linkIterator struct {
@@ -36,7 +36,7 @@ func (i *linkIterator) Error() error {
 func (i *linkIterator) Close() error {
 	err := i.rows.Close()
 	if err != nil {
-		return xerrors.Errorf("link iterator: %w", err)
+		return errors.New("link iterator: %w", err)
 	}
 	return nil
 }
@@ -74,7 +74,7 @@ func (i *edgeIterator) Error() error {
 func (i *edgeIterator) Close() error {
 	err := i.rows.Close()
 	if err != nil {
-		return xerrors.Errorf("edge iterator: %w", err)
+		return errors.New("edge iterator: %w", err)
 	}
 	return nil
 }

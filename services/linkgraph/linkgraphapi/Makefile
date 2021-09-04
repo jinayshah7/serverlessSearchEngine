@@ -6,6 +6,6 @@ proto: ensure-proto-deps
 
 ensure-proto-deps:
 	@echo "[go get] ensuring protoc packages are available"
-	@go get google.golang.org/grpc
-	@go get github.com/golang/protobuf/protoc-gen-go
+	@go install google.golang.org/grpc
+	@go install github.com/golang/protobuf/protoc-gen-go
 	
