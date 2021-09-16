@@ -46,14 +46,14 @@ func main() {
 	}
 	crawlerService, err := crawler.NewService(crawlerConfig)
 	if err != nil {
-		return err
+		return log.Fatalf("Could not initialize crawler service: %v", err.String())
 	}
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		if err := crawlerService.Run(ctx); err != nil {
-			log.Fatalf("err", err).Error("crawler service exited with error")
+			log.Fatalf("Crawler service exited with error: %v", err.String())
 		}
 	}()
 
