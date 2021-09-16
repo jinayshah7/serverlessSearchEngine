@@ -1,4 +1,3 @@
-# Deploy a single instance of the pagerank service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,9 +25,6 @@ spec:
           - "-link-graph-api=services-linkgraph.services-data:8080"
           - "-text-indexer-api=services-textindexer.services-data:8080"
           - "-partition-detection-mode=single"
-        ports:
-        - containerPort: 6060
-          name: pprof
         resources:
           limits:
             cpu: "1"
