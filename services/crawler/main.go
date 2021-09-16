@@ -5,10 +5,8 @@ import (
 	"errors"
 	"log"
 	"os"
-	"os/signal"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler"
@@ -17,8 +15,6 @@ import (
 	linkgraphproto "github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
 	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi"
 	textindexerproto "github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi/proto"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 )
@@ -35,7 +31,7 @@ func main() {
 		return err
 	}
 
-	graphAPI, indexerAPI, err := getAPIs(ctx, appCtx.String("link-graph-api"), appCtx.String("text-indexer-api"))
+	graphAPI, indexerAPI, err := getAPIs(ctx, linkGraphURL, textIndexerURL)
 	if err != nil {
 		return err
 	}
@@ -64,20 +60,20 @@ func main() {
 	wg.Wait()
 }
 
-func getAPIs(ctx context.Context, linkGraphAPI, textIndexerAPI string) (*linkgraphapi.LinkGraphClient, *textindexerapi.TextIndexerClient, error) {
+func getAPIs(ctx context.Context, linkGraphURL, textIndexerURL string) (*linkgraphapi.LinkGraphClient, *textindexerapi.TextIndexerClient, error) {
 
-	if linkGraphAPI == "" {
+	if linkGraphURL == "" {
 		return nil, nil, errors.New("link graph API must be specified with --link-graph-api")
 	}
 
-	if textIndexerAPI == "" {
+	if textIndexerURL == "" {
 		return nil, nil, errors.New("text indexer API must be specified with --text-indexer-api")
 	}
 
 	dialCtx, cancelFn := context.WithTimeout(ctx, 5*time.Second)
 	defer cancelFn()
 
-	linkGraphConnection, err := grpc.DialContext(dialCtx, linkGraphAPI, grpc.WithInsecure(), grpc.WithBlock())
+	linkGraphConnection, err := grpc.DialContext(dialCtx, linkGraphURL, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, nil, errors.New("could not connect to link graph API: %w", err)
 	}
@@ -87,7 +83,7 @@ func getAPIs(ctx context.Context, linkGraphAPI, textIndexerAPI string) (*linkgra
 	dialCtx, cancelFn = context.WithTimeout(ctx, 5*time.Second)
 	defer cancelFn()
 
-	indexerConnection, err := grpc.DialContext(dialCtx, textIndexerAPI, grpc.WithInsecure(), grpc.WithBlock())
+	indexerConnection, err := grpc.DialContext(dialCtx, textIndexerURL, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, nil, errors.New("could not connect to text indexer API: %w", err)
 	}
