@@ -7,8 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:generate mockgen -package mocks -destination mocks/mocks_api.go github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto JobQueue_JobStreamServer
-
 // workerPool stores remote worker connections until they get reserved for a job.
 type workerPool struct {
 	poolCtx        context.Context
@@ -22,7 +20,6 @@ type workerPool struct {
 	connectedWorkers   map[string]*remoteWorkerStream
 }
 
-// newWorkerPool creates a new worker pool instance.
 func newWorkerPool() *workerPool {
 	poolCtx, poolShutdownFn := context.WithCancel(context.Background())
 
@@ -35,7 +32,6 @@ func newWorkerPool() *workerPool {
 	}
 }
 
-// Close shuts down the pool and disconnects all connected workers.
 func (p *workerPool) Close() error {
 	p.poolShutdownFn()
 	p.healthCheckWg.Wait()
@@ -45,26 +41,20 @@ func (p *workerPool) Close() error {
 	return nil
 }
 
-// AddWorker adds a new worker to the pool.
 func (p *workerPool) AddWorker(worker *remoteWorkerStream) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Allocate a unique ID for the worker
 	var workerID string
 	for workerID = uuid.New().String(); p.connectedWorkers[workerID] != nil; workerID = uuid.New().String() {
 	}
 
-	// Start a health-checking go-routine to detect if the worker disconnects
-	// while waiting in the pool.
 	p.connectedWorkers[workerID] = worker
 	p.healthCheckWg.Add(1)
 	go p.monitorWorkerHealth(workerID, worker, p.stopHealthChecksCh)
 	p.notifyOfPoolMembershipChange()
 }
 
-// monitorWorkerHealth implements a worker that detects worker disconnects
-// while the worker is waiting in the pool.
 func (p *workerPool) monitorWorkerHealth(workerID string, w *remoteWorkerStream, stopSignalCh <-chan struct{}) {
 	defer p.healthCheckWg.Done()
 	for {
@@ -101,7 +91,6 @@ func (p *workerPool) removeWorker(workerID string) {
 // removed from the pool and returned back to the caller.
 func (p *workerPool) ReserveWorkers(ctx context.Context, minWorkers int) ([]*remoteWorkerStream, error) {
 	for {
-		// Check for required number of workers
 		p.mu.Lock()
 		if numWorkers := len(p.connectedWorkers); numWorkers > 0 && numWorkers >= minWorkers {
 			break // retain the lock to avoid changes in the pool
