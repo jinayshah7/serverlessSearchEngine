@@ -2,13 +2,13 @@ package dbspgraph
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph"
 	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/bspgraph/message"
 	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/job"
 	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
@@ -17,7 +17,6 @@ type workerJobCoordinatorConfig struct {
 	masterStream *remoteMasterStream
 	jobRunner    job.Runner
 	serializer   Serializer
-	logger       *logrus.Entry
 }
 
 // workerJobCoordinator is used by the worker node to coordinate the execution
@@ -153,7 +152,7 @@ func (c *workerJobCoordinator) handleMasterPayloads(graph *bspgraph.Graph) {
 func (c *workerJobCoordinator) relayNonLocalMessage(dst string, msg message.Message) error {
 	serializedMsg, err := c.cfg.serializer.Serialize(msg)
 	if err != nil {
-		return xerrors.Errorf("unable to serialize message: %w", err)
+		return errors.New("unable to serialize message: %w", err)
 	}
 
 	return c.sendToMaster(&proto.WorkerPayload{
@@ -169,19 +168,17 @@ func (c *workerJobCoordinator) relayNonLocalMessage(dst string, msg message.Mess
 func (c *workerJobCoordinator) deliverGraphMessage(graph *bspgraph.Graph, relayMsg *proto.RelayMessage) error {
 	payload, err := c.cfg.serializer.Unserialize(relayMsg.Message)
 	if err != nil {
-		return xerrors.Errorf("unable to decode relayed message: %w", err)
+		return errors.New("unable to decode relayed message: %w", err)
 	}
 
 	graphMsg, ok := payload.(message.Message)
 	if !ok {
-		return xerrors.Errorf("unable to relay message payloads that do not implement message.Message")
+		return errors.New("unable to relay message payloads that do not implement message.Message")
 	}
 
 	return graph.SendMessage(relayMsg.Destination, graphMsg)
 }
 
-// sendToMaster attempts to send a message to a remote master. It blocks
-// until either the message is enqueued for sending or the job context expires.
 func (c *workerJobCoordinator) sendToMaster(wMsg *proto.WorkerPayload) error {
 	select {
 	case c.cfg.masterStream.SendToMasterChan() <- wMsg:

@@ -2,6 +2,8 @@ package dbspgraph
 
 import (
 	"context"
+	"errors"
+	"log"
 	"sync"
 	"time"
 
@@ -9,13 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/job"
 	"github.com/jinayshah7/distributedSearchEngine/services/pagerank/dbspgraph/proto"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 )
 
-// Worker coordinates the execution of a distributed graph-based algorithm
-// built on top of the bspgraph framework with a remote master node.
 type Worker struct {
 	cfg WorkerConfig
 
@@ -51,7 +50,6 @@ func (w *Worker) Dial(masterEndpoint string, dialTimeout time.Duration) error {
 	return nil
 }
 
-// Close shuts down the worker.
 func (w *Worker) Close() error {
 	var err error
 	if w.masterConn != nil {
@@ -61,16 +59,13 @@ func (w *Worker) Close() error {
 	return err
 }
 
-// RunJob waits for a new job announcement from the master and coordinates its
-// execution with the master until it either completes or is aborted due to a
-// context expiration or a local/remote error.
 func (w *Worker) RunJob(ctx context.Context) error {
 	stream, err := w.masterCli.JobStream(ctx)
 	if err != nil {
 		return err
 	}
 
-	w.cfg.Logger.Info("waiting for next job")
+	log.Info("waiting for next job")
 	jobDetails, err := w.waitForJob(stream)
 	if err != nil {
 		return err
@@ -83,7 +78,6 @@ func (w *Worker) RunJob(ctx context.Context) error {
 		masterStream: masterStream,
 		jobRunner:    w.cfg.JobRunner,
 		serializer:   w.cfg.Serializer,
-		logger:       jobLogger,
 	})
 
 	var wg sync.WaitGroup
@@ -94,43 +88,38 @@ func (w *Worker) RunJob(ctx context.Context) error {
 			coordinator.cancelJobCtx()
 		}
 	}()
-	jobLogger.WithFields(logrus.Fields{
-		"created_at":          jobDetails.CreatedAt,
-		"partition_from_uuid": jobDetails.PartitionFromID,
-		"partition_to_uuid":   jobDetails.PartitionToID,
-	}).Info("starting new job")
+	log.Info("starting new job")
 
 	if err = coordinator.RunJob(); err != nil {
-		jobLogger.WithField("err", err).Error("job execution failed")
+		log.Error("job execution failed %w", err)
 	} else {
-		jobLogger.Info("job completed successfully")
+		log.Info("job completed successfully")
 	}
 	masterStream.Close()
 	wg.Wait()
 	return err
 }
 
-// waitForJob blocks waiting for a job announcement forom the master node.
 func (w *Worker) waitForJob(jobStream proto.JobQueue_JobStreamClient) (job.Details, error) {
 	var jobDetails job.Details
 
 	mMsg, err := jobStream.Recv()
 	if err != nil {
-		return jobDetails, xerrors.Errorf("unable to read job details from master: %w", err)
+		return jobDetails, errors.New("unable to read job details from master: %w", err)
 	}
 
 	jobDetailsMsg := mMsg.GetJobDetails()
 	if jobDetailsMsg == nil {
-		return jobDetails, xerrors.Errorf("expected master to send a JobDetails message")
+		return jobDetails, errors.New("expected master to send a JobDetails message")
 	}
 
 	jobDetails.JobID = jobDetailsMsg.JobId
 	if jobDetails.CreatedAt, err = ptypes.Timestamp(jobDetailsMsg.CreatedAt); err != nil {
-		return jobDetails, xerrors.Errorf("unable to parse job creation time: %w", err)
+		return jobDetails, errors.New("unable to parse job creation time: %w", err)
 	} else if jobDetails.PartitionFromID, err = uuid.FromBytes(jobDetailsMsg.PartitionFromUuid[:]); err != nil {
-		return jobDetails, xerrors.Errorf("unable to parse partition start UUID: %w", err)
+		return jobDetails, errors.New("unable to parse partition start UUID: %w", err)
 	} else if jobDetails.PartitionToID, err = uuid.FromBytes(jobDetailsMsg.PartitionToUuid[:]); err != nil {
-		return jobDetails, xerrors.Errorf("unable to parse partition end UUID: %w", err)
+		return jobDetails, errors.New("unable to parse partition end UUID: %w", err)
 	}
 
 	return jobDetails, nil
