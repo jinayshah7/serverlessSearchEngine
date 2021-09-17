@@ -111,8 +111,6 @@ func (p *workerPool) ReserveWorkers(ctx context.Context, minWorkers int) ([]*rem
 	close(p.stopHealthChecksCh)
 	p.healthCheckWg.Wait()
 
-	// Extract list of workers from the pool and create a new signal
-	// channel for future workers.
 	workers := make([]*remoteWorkerStream, 0, len(p.connectedWorkers))
 	for _, w := range p.connectedWorkers {
 		workers = append(workers, w)

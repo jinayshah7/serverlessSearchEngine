@@ -218,7 +218,6 @@ func (s *remoteMasterStream) SetDisconnectCallback(cb func()) {
 	s.mu.Unlock()
 }
 
-// Close gracefully terminates the connection to the master.
 func (s *remoteMasterStream) Close() {
 	s.cancelFn()
 }

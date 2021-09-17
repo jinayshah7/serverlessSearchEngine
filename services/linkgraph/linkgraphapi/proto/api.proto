@@ -29,13 +29,11 @@ message RemoveStaleEdgesQuery {
 message Range {
   bytes from_uuid = 1;
   bytes to_uuid = 2;
-
-  // Return results before this filter timestamp.
   google.protobuf.Timestamp filter = 3;
 }
 
 
-service LinkGraph {
+service LinkRepository {
 
   rpc SaveLink(Link) returns (Link);
 

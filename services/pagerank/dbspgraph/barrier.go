@@ -160,7 +160,6 @@ func (b *workerStepBarrier) Notify(step *proto.Step) error {
 		return xerrors.Errorf("unsupported step type %q", proto.Step_Type_name[int32(step.Type)])
 	}
 
-	// Notify waiter
 	select {
 	case ch <- step:
 		return nil

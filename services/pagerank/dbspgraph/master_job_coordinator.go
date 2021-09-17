@@ -37,8 +37,6 @@ type masterJobCoordinator struct {
 	cfg masterJobCoordinatorConfig
 }
 
-// newMasterJobCoordinator creates a new coordinator instance with the
-// specified worker list.
 func newMasterJobCoordinator(ctx context.Context, cfg masterJobCoordinatorConfig) (*masterJobCoordinator, error) {
 	partRange, err := partition.NewRange(cfg.jobDetails.PartitionFromID, cfg.jobDetails.PartitionToID, len(cfg.workers))
 	if err != nil {
@@ -55,8 +53,6 @@ func newMasterJobCoordinator(ctx context.Context, cfg masterJobCoordinatorConfig
 	}, nil
 }
 
-// RunJob orchestrates the execution of a graph algorithm with the set of
-// connected workers.
 func (c *masterJobCoordinator) RunJob() error {
 	// Create a wrapper for patching the user-defined executor callbacks so
 	// they can be executed in lock-step with the workers and pass the
@@ -137,10 +133,6 @@ func (c *masterJobCoordinator) publishJobDetails(w *remoteWorkerStream, assigned
 	return nil
 }
 
-// runJobToCompletion executes all required graph supersteps until the
-// user-defined condition is met. If all workers complete the job
-// successfully, then the job coordinator ensures that all workers persist
-// the calculated results without an error before returning.
 func (c *masterJobCoordinator) runJobToCompletion(executor *bspgraph.Executor) error {
 	if err := executor.RunToCompletion(c.jobCtx); err != nil {
 		return err
@@ -161,8 +153,6 @@ func (c *masterJobCoordinator) runJobToCompletion(executor *bspgraph.Executor) e
 	return nil
 }
 
-// handleWorkerPayloads implements the receive loop for messages sent by remote
-// workers.
 func (c *masterJobCoordinator) handleWorkerPayloads(workerIndex int, worker *remoteWorkerStream, graph *bspgraph.Graph) {
 	var wPayload *proto.WorkerPayload
 	for {
@@ -190,21 +180,17 @@ func (c *masterJobCoordinator) handleWorkerPayloads(workerIndex int, worker *rem
 	}
 }
 
-// relayMessageToWorker examines the destination ID for the provided message
-// and queries the configured partition range to select the worker that the
-// message should be forwarded to.
 func (c *masterJobCoordinator) relayMessageToWorker(srcWorkerIndex int, relayMsg *proto.RelayMessage) {
-	// Find destination partition for the message
 	dstUUID, err := uuid.Parse(relayMsg.Destination)
 	if err != nil {
-		c.cfg.logger.WithField("err", err).Error("unable to parse message destination UUID")
+		log.Error("unable to parse message destination UUID %w", err)
 		c.cancelJobCtx()
 		return
 	}
 
 	partIndex, err := c.partRange.PartitionForID(dstUUID)
 	if err != nil {
-		c.cfg.logger.WithField("err", err).Error("unable to identify target partition for message")
+		log.Error("unable to identify target partition for message %w", err)
 		c.cancelJobCtx()
 		return
 	}
@@ -217,14 +203,11 @@ func (c *masterJobCoordinator) relayMessageToWorker(srcWorkerIndex int, relayMsg
 		return
 	}
 
-	// Forward message to the worker assigned to this partition.
 	c.sendToWorker(c.cfg.workers[partIndex], &proto.MasterPayload{
 		Payload: &proto.MasterPayload_RelayMessage{RelayMessage: relayMsg},
 	})
 }
 
-// sendToWorker attempts to send a message to a remote worker. It blocks
-// until either the message is enqueued for sending or the job context expires.
 func (c *masterJobCoordinator) sendToWorker(worker *remoteWorkerStream, mMsg *proto.MasterPayload) {
 	select {
 	case worker.SendToWorkerChan() <- mMsg:
