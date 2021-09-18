@@ -5,7 +5,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 message Document {
-  bytes link_id = 1;
+  bytes document_id = 1;
   string url = 2;
   string title = 3;
   string content = 4;
@@ -15,7 +15,6 @@ message Document {
 message Query {
   Type type = 1;
   string expression = 2;
-
   uint64 offset = 3;
 
   enum Type {
@@ -46,7 +45,7 @@ message DocumentID {
 
 service DocumentRepository {
   rpc Index(Document) returns (Document);
-  rpc Search(Query) returns (stream QueryResult);
+  rpc Search(SearchQuery) returns (stream SearchResult);
   rpc SetPageRankScore(SetPageRankScoreRequest) returns (google.protobuf.Empty);
   rpc GetPageRankScore(DocumentID) returns (PageRankScore)
 }
