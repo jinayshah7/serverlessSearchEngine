@@ -12,7 +12,7 @@ message Document {
   google.protobuf.Timestamp indexed_at = 5;
 }
 
-message Query {
+message SearchQuery {
   Type type = 1;
   string expression = 2;
   uint64 offset = 3;
@@ -23,7 +23,7 @@ message Query {
   }
 }
 
-message QueryResult {
+message SearchResult {
   oneof result {
     uint64 doc_count = 1;
     Document doc = 2;
