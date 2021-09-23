@@ -6,8 +6,7 @@ import (
 	"net"
 	"sync"
 
-	proto "github.com/jinayshah7/distributedSearchEngine/proto/linkrepository"
-	"github.com/jinayshah7/distributedSearchEngine/services/link_repository/cdb"
+	proto "github.com/jinayshah7/distributedSearchEngine/proto/link_repository"
 	"google.golang.org/grpc"
 )
 
@@ -42,5 +41,5 @@ func getLinkGraph(linkGraphURI string) (linkrepository.linkGraphClient, error) {
 	if linkGraphURI == "" {
 		return nil, errors.New("Link Graph URI not found")
 	}
-	return cdb.NewCockroachDbGraph(linkGraphURI)
+	return NewCockroachDbGraph(linkGraphURI)
 }
