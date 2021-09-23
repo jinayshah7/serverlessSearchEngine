@@ -15,10 +15,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// The name of the elasticsearch index to use.
 const indexName = "textindexer"
 
-// The size of each page of results that is cached locally by the iterator.
 const batchSize = 10
 
 var esMappings = `
@@ -314,8 +312,6 @@ func mapEsDoc(d *esDoc) *index.Document {
 }
 
 func makeEsDoc(d *index.Document) esDoc {
-	// Note: we intentionally skip PageRank as we don't want updates to
-	// overwrite existing PageRank values.
 	return esDoc{
 		LinkID:    d.LinkID.String(),
 		URL:       d.URL,
