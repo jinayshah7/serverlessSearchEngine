@@ -6,10 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/cdb"
-	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
-	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi"
-	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/linkgraphapi/proto"
+	"github.com/jinayshah7/distributedSearchEngine/services/linkrepository/cdb"
 	"google.golang.org/grpc"
 )
 
@@ -33,14 +30,14 @@ func main() {
 	go func() {
 		defer wg.Done()
 		grpcServer := grpc.NewServer()
-		proto.RegisterLinkGraphServer(srv, linkgraphapi.NewLinkGraphServer(graph))
+		proto.RegisterLinkGraphServer(srv, graph)
 		_ = grpcServer.Serve(grpcListener)
 	}()
 
 	wg.Wait()
 }
 
-func getLinkGraph(linkGraphURI string) (graph.Graph, error) {
+func getLinkGraph(linkGraphURI string) (linkrepository.linkGraphClient, error) {
 	if linkGraphURI == "" {
 		return nil, errors.New("Link Graph URI not found")
 	}

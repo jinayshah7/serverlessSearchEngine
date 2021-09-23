@@ -1,5 +1,6 @@
 syntax="proto3";
-package proto;
+package document_repository;
+option go_package="./";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
@@ -47,5 +48,5 @@ service DocumentRepository {
   rpc Index(Document) returns (Document);
   rpc Search(SearchQuery) returns (stream SearchResult);
   rpc SetPageRankScore(SetPageRankScoreRequest) returns (google.protobuf.Empty);
-  rpc GetPageRankScore(DocumentID) returns (PageRankScore)
+  rpc GetPageRankScore(DocumentID) returns (PageRankScore);
 }
