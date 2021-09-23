@@ -1,5 +1,5 @@
 syntax="proto3";
-package document_repository;
+package documentRepository;
 option go_package="./";
 
 import "google/protobuf/timestamp.proto";

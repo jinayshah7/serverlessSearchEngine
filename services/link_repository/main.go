@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	proto "github.com/jinayshah7/distributedSearchEngine/proto/link_repository"
+	proto "github.com/jinayshah7/distributedSearchEngine/proto/linkRepository"
 	"google.golang.org/grpc"
 )
 
@@ -37,7 +37,7 @@ func main() {
 	wg.Wait()
 }
 
-func getLinkGraph(linkGraphURI string) (linkrepository.linkGraphClient, error) {
+func getLinkGraph(linkGraphURI string) (linkRepository.linkRepositoryClient, error) {
 	if linkGraphURI == "" {
 		return nil, errors.New("Link Graph URI not found")
 	}

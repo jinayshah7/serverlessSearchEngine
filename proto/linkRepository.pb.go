@@ -4,7 +4,7 @@
 // 	protoc        v3.15.2
 // source: linkRepository.proto
 
-package __
+package linkRepository
 
 import (
 	context "context"
@@ -219,7 +219,7 @@ var File_linkRepository_proto protoreflect.FileDescriptor
 
 var file_linkRepository_proto_rawDesc = []byte{
 	0x0a, 0x14, 0x6c, 0x69, 0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f, 0x72, 0x79,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0e, 0x6c, 0x69, 0x6e, 0x6b, 0x72, 0x65, 0x70, 0x6f,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0e, 0x6c, 0x69, 0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f,
 	0x73, 0x69, 0x74, 0x6f, 0x72, 0x79, 0x1a, 0x1f, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d,
 	0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f,
@@ -251,14 +251,14 @@ var file_linkRepository_proto_rawDesc = []byte{
 	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x42, 0x65, 0x66, 0x6f, 0x72, 0x65, 0x32, 0xcf, 0x01, 0x0a,
 	0x0e, 0x4c, 0x69, 0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f, 0x72, 0x79, 0x12,
 	0x36, 0x0a, 0x08, 0x53, 0x61, 0x76, 0x65, 0x4c, 0x69, 0x6e, 0x6b, 0x12, 0x14, 0x2e, 0x6c, 0x69,
-	0x6e, 0x6b, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f, 0x72, 0x79, 0x2e, 0x4c, 0x69, 0x6e,
-	0x6b, 0x1a, 0x14, 0x2e, 0x6c, 0x69, 0x6e, 0x6b, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f,
+	0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f, 0x72, 0x79, 0x2e, 0x4c, 0x69, 0x6e,
+	0x6b, 0x1a, 0x14, 0x2e, 0x6c, 0x69, 0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f,
 	0x72, 0x79, 0x2e, 0x4c, 0x69, 0x6e, 0x6b, 0x12, 0x36, 0x0a, 0x08, 0x53, 0x61, 0x76, 0x65, 0x45,
-	0x64, 0x67, 0x65, 0x12, 0x14, 0x2e, 0x6c, 0x69, 0x6e, 0x6b, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x69,
+	0x64, 0x67, 0x65, 0x12, 0x14, 0x2e, 0x6c, 0x69, 0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x69,
 	0x74, 0x6f, 0x72, 0x79, 0x2e, 0x45, 0x64, 0x67, 0x65, 0x1a, 0x14, 0x2e, 0x6c, 0x69, 0x6e, 0x6b,
-	0x72, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f, 0x72, 0x79, 0x2e, 0x45, 0x64, 0x67, 0x65, 0x12,
+	0x52, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f, 0x72, 0x79, 0x2e, 0x45, 0x64, 0x67, 0x65, 0x12,
 	0x4d, 0x0a, 0x0e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x4f, 0x6c, 0x64, 0x45, 0x64, 0x67, 0x65,
-	0x73, 0x12, 0x23, 0x2e, 0x6c, 0x69, 0x6e, 0x6b, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f,
+	0x73, 0x12, 0x23, 0x2e, 0x6c, 0x69, 0x6e, 0x6b, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x6f,
 	0x72, 0x79, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x4f, 0x6c, 0x64, 0x45, 0x64, 0x67, 0x65,
 	0x73, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x04,
@@ -279,22 +279,22 @@ func file_linkRepository_proto_rawDescGZIP() []byte {
 
 var file_linkRepository_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_linkRepository_proto_goTypes = []interface{}{
-	(*Link)(nil),                  // 0: linkrepository.Link
-	(*Edge)(nil),                  // 1: linkrepository.Edge
-	(*RemoveOldEdgesQuery)(nil),   // 2: linkrepository.RemoveOldEdgesQuery
+	(*Link)(nil),                  // 0: linkRepository.Link
+	(*Edge)(nil),                  // 1: linkRepository.Edge
+	(*RemoveOldEdgesQuery)(nil),   // 2: linkRepository.RemoveOldEdgesQuery
 	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
 	(*emptypb.Empty)(nil),         // 4: google.protobuf.Empty
 }
 var file_linkRepository_proto_depIdxs = []int32{
-	3, // 0: linkrepository.Link.retrieved_at:type_name -> google.protobuf.Timestamp
-	3, // 1: linkrepository.Edge.updated_at:type_name -> google.protobuf.Timestamp
-	3, // 2: linkrepository.RemoveOldEdgesQuery.updated_before:type_name -> google.protobuf.Timestamp
-	0, // 3: linkrepository.LinkRepository.SaveLink:input_type -> linkrepository.Link
-	1, // 4: linkrepository.LinkRepository.SaveEdge:input_type -> linkrepository.Edge
-	2, // 5: linkrepository.LinkRepository.RemoveOldEdges:input_type -> linkrepository.RemoveOldEdgesQuery
-	0, // 6: linkrepository.LinkRepository.SaveLink:output_type -> linkrepository.Link
-	1, // 7: linkrepository.LinkRepository.SaveEdge:output_type -> linkrepository.Edge
-	4, // 8: linkrepository.LinkRepository.RemoveOldEdges:output_type -> google.protobuf.Empty
+	3, // 0: linkRepository.Link.retrieved_at:type_name -> google.protobuf.Timestamp
+	3, // 1: linkRepository.Edge.updated_at:type_name -> google.protobuf.Timestamp
+	3, // 2: linkRepository.RemoveOldEdgesQuery.updated_before:type_name -> google.protobuf.Timestamp
+	0, // 3: linkRepository.LinkRepository.SaveLink:input_type -> linkRepository.Link
+	1, // 4: linkRepository.LinkRepository.SaveEdge:input_type -> linkRepository.Edge
+	2, // 5: linkRepository.LinkRepository.RemoveOldEdges:input_type -> linkRepository.RemoveOldEdgesQuery
+	0, // 6: linkRepository.LinkRepository.SaveLink:output_type -> linkRepository.Link
+	1, // 7: linkRepository.LinkRepository.SaveEdge:output_type -> linkRepository.Edge
+	4, // 8: linkRepository.LinkRepository.RemoveOldEdges:output_type -> google.protobuf.Empty
 	6, // [6:9] is the sub-list for method output_type
 	3, // [3:6] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -392,7 +392,7 @@ func NewLinkRepositoryClient(cc grpc.ClientConnInterface) LinkRepositoryClient {
 
 func (c *linkRepositoryClient) SaveLink(ctx context.Context, in *Link, opts ...grpc.CallOption) (*Link, error) {
 	out := new(Link)
-	err := c.cc.Invoke(ctx, "/linkrepository.LinkRepository/SaveLink", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/linkRepository.LinkRepository/SaveLink", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -401,7 +401,7 @@ func (c *linkRepositoryClient) SaveLink(ctx context.Context, in *Link, opts ...g
 
 func (c *linkRepositoryClient) SaveEdge(ctx context.Context, in *Edge, opts ...grpc.CallOption) (*Edge, error) {
 	out := new(Edge)
-	err := c.cc.Invoke(ctx, "/linkrepository.LinkRepository/SaveEdge", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/linkRepository.LinkRepository/SaveEdge", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +410,7 @@ func (c *linkRepositoryClient) SaveEdge(ctx context.Context, in *Edge, opts ...g
 
 func (c *linkRepositoryClient) RemoveOldEdges(ctx context.Context, in *RemoveOldEdgesQuery, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/linkrepository.LinkRepository/RemoveOldEdges", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/linkRepository.LinkRepository/RemoveOldEdges", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -452,7 +452,7 @@ func _LinkRepository_SaveLink_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/linkrepository.LinkRepository/SaveLink",
+		FullMethod: "/linkRepository.LinkRepository/SaveLink",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LinkRepositoryServer).SaveLink(ctx, req.(*Link))
@@ -470,7 +470,7 @@ func _LinkRepository_SaveEdge_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/linkrepository.LinkRepository/SaveEdge",
+		FullMethod: "/linkRepository.LinkRepository/SaveEdge",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LinkRepositoryServer).SaveEdge(ctx, req.(*Edge))
@@ -488,7 +488,7 @@ func _LinkRepository_RemoveOldEdges_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/linkrepository.LinkRepository/RemoveOldEdges",
+		FullMethod: "/linkRepository.LinkRepository/RemoveOldEdges",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LinkRepositoryServer).RemoveOldEdges(ctx, req.(*RemoveOldEdgesQuery))
@@ -497,7 +497,7 @@ func _LinkRepository_RemoveOldEdges_Handler(srv interface{}, ctx context.Context
 }
 
 var _LinkRepository_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "linkrepository.LinkRepository",
+	ServiceName: "linkRepository.LinkRepository",
 	HandlerType: (*LinkRepositoryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
