@@ -14,8 +14,8 @@ message Link {
 
 message Edge {
   bytes uuid = 1;
-  bytes src_uuid = 2;
-  bytes dst_uuid = 3;
+  bytes source_uuid = 2;
+  bytes destination_uuid = 3;
   google.protobuf.Timestamp updated_at = 4;
 }
 
@@ -29,6 +29,5 @@ service LinkRepository {
 
   rpc SaveLink(Link) returns (Link);
   rpc SaveEdge(Edge) returns (Edge);
-
   rpc RemoveOldEdges(RemoveOldEdgesQuery) returns (google.protobuf.Empty);
 }
