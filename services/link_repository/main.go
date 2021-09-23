@@ -6,7 +6,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/jinayshah7/distributedSearchEngine/services/linkrepository/cdb"
+	proto "github.com/jinayshah7/distributedSearchEngine/proto/linkrepository"
+	"github.com/jinayshah7/distributedSearchEngine/services/link_repository/cdb"
 	"google.golang.org/grpc"
 )
 

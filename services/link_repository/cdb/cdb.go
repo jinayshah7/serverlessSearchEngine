@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
 	"github.com/lib/pq"
 )
 
@@ -27,7 +26,7 @@ RETURNING id, updated_at
 	edgesInPartitionQuery = "SELECT id, src, dst, updated_at FROM edges WHERE src >= $1 AND src < $2 AND updated_at < $3"
 	removeStaleEdgesQuery = "DELETE FROM edges WHERE src=$1 AND updated_at < $2"
 
-	_ graph.Graph = (*CockroachDBGraph)(nil)
+//	_ graph.Graph = (*CockroachDBGraph)(nil)
 )
 
 type CockroachDBGraph struct {
