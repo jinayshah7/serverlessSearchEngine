@@ -1,6 +1,6 @@
 syntax="proto3";
 package linkRepository;
-option go_package = "./";
+option go_package = "./;linkRepository";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";

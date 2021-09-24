@@ -4,25 +4,26 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 
-	proto "github.com/jinayshah7/distributedSearchEngine/proto/linkRepository"
+	"github.com/jinayshah7/distributedSearchEngine/proto/linkRepository"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	var wg sync.WaitGroup
-	grpcPort := os.GetEnv("GRPC_PORT")
-	linkGraphURI := os.GetEnv("LINK_GRAPH_URI")
+	grpcPort := os.Getenv("GRPC_PORT")
+	linkGraphURI := os.Getenv("LINK_GRAPH_URI")
 
 	graph, err := getLinkGraph(linkGraphURI)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
-		return err
+		panic(err)
 	}
 	defer func() { _ = grpcListener.Close() }()
 
@@ -30,14 +31,14 @@ func main() {
 	go func() {
 		defer wg.Done()
 		grpcServer := grpc.NewServer()
-		proto.RegisterLinkGraphServer(srv, graph)
+		linkRepository.RegisterLinkRepositoryServer(grpcServer, graph)
 		_ = grpcServer.Serve(grpcListener)
 	}()
 
 	wg.Wait()
 }
 
-func getLinkGraph(linkGraphURI string) (linkRepository.linkRepositoryClient, error) {
+func getLinkGraph(linkGraphURI string) (linkRepository.LinkRepositoryServer, error) {
 	if linkGraphURI == "" {
 		return nil, errors.New("Link Graph URI not found")
 	}

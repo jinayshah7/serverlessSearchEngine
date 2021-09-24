@@ -1,18 +1,16 @@
 FROM golang:1.17 AS builder
 
-WORKDIR .
+WORKDIR /app 
 COPY . .
-
-RUN GO111MODULE=on go mod tidy 
-RUN CGO_ENABLED=0 \
-    GOARCH=amd64 \
+RUN go mod tidy 
+RUN GOARCH=amd64 \
     GOOS=linux \
     go build -ldflags="-w -s" \
-    -o /go/bin/linkgraph \
-    main.go
+    -o /go/bin/linkRepository \
+    . 
 
 
-FROM gcr.io/distroless/static-debian10@sha256:39256cddc96ed19eefc89c4077138a45855d736029a256787154eafc8e8ebf30
-COPY --from=builder /go/bin/linkgraph /
+FROM golang:1.17
+COPY --from=builder /go/bin/linkRepository /
 
-ENTRYPOINT ["/linkgraph"]
+ENTRYPOINT ["/linkRepository"]
