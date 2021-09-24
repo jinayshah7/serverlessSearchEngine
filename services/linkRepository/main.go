@@ -14,9 +14,9 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	grpcPort := os.Getenv("GRPC_PORT")
-	linkGraphURI := os.Getenv("LINK_GRAPH_URI")
+	linkRepositoryURL := os.Getenv("LINK_REPOSITORY_URL")
 
-	graph, err := getLinkGraph(linkGraphURI)
+	repository, err := getLinkRepository(linkRepositoryURL)
 	if err != nil {
 		panic(err)
 	}
@@ -31,16 +31,16 @@ func main() {
 	go func() {
 		defer wg.Done()
 		grpcServer := grpc.NewServer()
-		linkRepository.RegisterLinkRepositoryServer(grpcServer, graph)
+		linkRepository.RegisterLinkRepositoryServer(grpcServer, repository)
 		_ = grpcServer.Serve(grpcListener)
 	}()
 
 	wg.Wait()
 }
 
-func getLinkGraph(linkGraphURI string) (linkRepository.LinkRepositoryServer, error) {
-	if linkGraphURI == "" {
+func getLinkRepository(linkRepositoryURL string) (linkRepository.LinkRepositoryServer, error) {
+	if linkRepositoryURL == "" {
 		return nil, errors.New("Link Graph URI not found")
 	}
-	return NewCockroachDbGraph(linkGraphURI)
+	return NewCockroachDbGraph(linkRepositoryURL)
 }

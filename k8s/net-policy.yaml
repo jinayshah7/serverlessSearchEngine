@@ -1,5 +1,3 @@
-# Drop traffic to services-data from all other namespaces; a separate policy
-# will be used to white-list the traffic we do want to allow
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
@@ -12,9 +10,6 @@ spec:
   - from:
     - podSelector: {}
 ---
-# Allow all pods in the services namespace (role: services-components) to
-# access the link-graph and text-indexer APIs but none of the other pods in 
-# the services-data namespace
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
