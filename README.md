@@ -1,18 +1,35 @@
-# Distributed Search Engine (Google Search Clone)
+# README
 
 This is my attempt to build a complex system, learn new things and share everything along the way. Here are my goals:
 
 - Build a fairly complex product that can scale
 - Have the best readable code and documentation
-- **Share this with everyone through articles/videos**
+- Share this with everyone through articles/videos
 
-I have adapted the architecture and code from the book **Hands On Software Engineering with Go.** Currently, a high ratio of code is from the author, but I have planned to add features to build my own unique product. Here's what the project currently has:
+I have adapted the architecture and code from the book **Hands On Software Engineering with Go.** Currently, a lot of the architecture and some code is from the book author, but I have planned to add features to build my own unique product. Here's what the project currently has:
 
 - LinkGraphRepository
-    - Interface for this repo
+
+    ```protobuf
+    service LinkRepository {
+      rpc SaveLink(Link) returns (Link);
+      rpc SaveEdge(Edge) returns (Edge);
+      rpc RemoveOldEdges(RemoveOldEdgesQuery) returns (google.protobuf.Empty);
+    }
+    ```
+
     - Uses CockroachDB
 - DocumentRepository
-    - Interface for this repo
+
+    ```protobuf
+    service DocumentRepository {
+      rpc Index(Document) returns (Document);
+      rpc Search(SearchQuery) returns (stream SearchResult);
+      rpc SetPageRankScore(SetPageRankScoreRequest) returns (google.protobuf.Empty);
+      rpc GetPageRankScore(DocumentID) returns (PageRankScore);
+    }
+    ```
+
     - Uses Elasticsearch
 - CrawlerService
     - Gathers links, content from those links and saves them using the two repositories
@@ -25,13 +42,13 @@ The services are all independent of each other, each keeps doing their job regar
 
 - Crawl the web, save web pages and index them
 - Calculate PageRank scores using a distributed algorithm
-- Allow sending a REST API request to the FrontendService, get search results
+- Allow sending a REST API request to the frontendService, get search results
 
 Here are the features I want to add to the search engine:
 
 - **Kafka support for crawling** - When new links are found, they are saved to a queue for crawling. Current implementation uses an in-memory queue which is not scalable.
 - **Kafka support for PageRank** - Same reason as crawling. Kafka is needed for a distributed and more durable queue. I also want to explore how Kafka can help the system resume crawling after getting shutdown.
-- **BERT vectors** - Each page is stored as a document in Elasticsearch. The document has a field called PageRankScore which is populated by the PageRankService. When a search happens, Elastic returns a set of documents that matched along with a score for how closely they matched. Each document is ranked based on: Elasticsearch's score + PageRankScore for that document. This would either involve having a lightweight service that can product vectors or maybe use an external API that completes the job. I'll choose whatever is cheaper and easier to implement.
+- **BERT vectors** - Each page is stored as a document in Elasticsearch. The document has a field called PageRankScore which is populated by the PageRankService. When a search happens, Elastic returns a set of documents that matched along with a score for how closely they matched. Each document is ranked based on: Elasticsearch's score + PageRankScore for that document. Elasticsearch supports storing and searching vectors, that score would be a good fit for the ranking. Supporting this feature would either involve having a lightweight service that can product vectors or maybe use an external API that completes the job. I'll choose whatever is cheaper and easier to implement.
 - **React Frontend** - It'll make the project truly accessible, right now its inconvenient to send JSON requests for searching. This is frontend, my weakest and last priority, so I'll make the most simple UI possible.
 - **Autocomplete** - This requires setup on the frontend as well as the backend. I'm sure this is not possible without having a React frontend first. I'm open to other frameworks but chose React because it's more popular and therefore will have more community support / learning resources.
 - **User Activity Tracking using URLs** - When the frontend responds with search results, they're just direct links to the results. I want to return a shortened proxy link. When the user clicks on the link, they'll come to my backend, and I'll redirect them to the original link. This way I know what the user actually clicks on. This helps the page ranking and possibly customizing results for that user in the future.
