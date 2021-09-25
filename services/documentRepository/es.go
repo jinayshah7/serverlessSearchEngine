@@ -1,4 +1,4 @@
-package es
+package main
 
 import (
 	"bytes"
@@ -13,10 +13,9 @@ import (
 	"github.com/elastic/go-elasticsearch/esapi"
 	"github.com/google/uuid"
 	"github.com/jinayshah7/distributedSearchEngine/proto/documentRepository"
-	"golang.org/x/xerrors"
 )
 
-const indexName = "textindexer"
+const indexName = "documentRepository"
 
 const batchSize = 10
 
@@ -38,6 +37,11 @@ type esSearchRes struct {
 	Hits esSearchResHits `json:"hits"`
 }
 
+type esindexQuery struct {
+	doc         esDoc `json: "doc"`
+	docAsUpsert bool  `json: "doc_as_upsert"`
+}
+
 type esSearchResHits struct {
 	Total   esTotal        `json:"total"`
 	HitList []esHitWrapper `json:"hits"`
@@ -52,12 +56,12 @@ type esHitWrapper struct {
 }
 
 type esDoc struct {
-	LinkID    string    `json:"LinkID"`
-	URL       string    `json:"URL"`
-	Title     string    `json:"Title"`
-	Content   string    `json:"Content"`
-	IndexedAt time.Time `json:"IndexedAt"`
-	PageRank  float64   `json:"PageRank,omitempty"`
+	DocumentID string    `json:"DocumentID"`
+	URL        string    `json:"URL"`
+	Title      string    `json:"Title"`
+	Content    string    `json:"Content"`
+	IndexedAt  time.Time `json:"IndexedAt"`
+	PageRank   float64   `json:"PageRank,omitempty"`
 }
 
 type esUpdateRes struct {
@@ -113,19 +117,18 @@ func (i *ElasticSearchIndexer) Index(doc *documentRepository.Document) error {
 		return errors.New(Sprintf("index: cannot find the specified document id: %v", doc.DocumentId))
 	}
 
-	var (
-		buf   bytes.Buffer
-		esDoc = makeEsDoc(doc)
-	)
-	update := map[string]interface{}{
-		"doc":           esDoc,
-		"doc_as_upsert": true,
+	var buf bytes.Buffer
+
+	update := esindexQuery{
+		doc:           makeEsDoc(doc),
+		doc_as_upsert: true,
 	}
+
 	if err := json.NewEncoder(&buf).Encode(update); err != nil {
 		return errors.New("index: %w", err)
 	}
 
-	res, err := i.es.Update(indexName, esDoc.LinkID, &buf, i.refreshOpt)
+	res, err := i.es.Update(indexName, esDoc.DocumentID, &buf, i.refreshOpt)
 	if err != nil {
 		return errors.New(fmt.Sprintf("index: %w", err))
 	}
@@ -138,12 +141,12 @@ func (i *ElasticSearchIndexer) Index(doc *documentRepository.Document) error {
 	return nil
 }
 
-func (i *ElasticSearchIndexer) FindByID(linkID uuid.UUID) (*index.Document, error) {
+func (i *ElasticSearchIndexer) FindByID(documentId uuid.UUID) (*index.Document, error) {
 	var buf bytes.Buffer
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
 			"match": map[string]interface{}{
-				"LinkID": linkID.String(),
+				"LinkID": documentId.String(),
 			},
 		},
 		"from": 0,
@@ -290,23 +293,23 @@ func unmarshalResponse(res *esapi.Response, to interface{}) error {
 	return json.NewDecoder(res.Body).Decode(to)
 }
 
-func mapEsDoc(d *esDoc) *index.Document {
-	return &index.Document{
-		DocumentId: uuid.MustParse(d.LinkID),
+func mapEsDoc(d *esDoc) *documentRepository.Document {
+	return &documentRepository.Document{
+		DocumentId: uuid.MustParse(d.DocumentID),
 		Url:        d.URL,
 		Title:      d.Title,
 		Content:    d.Content,
-		IndexedAt:  d.IndexedAt.UTC(),
+		IndexedAt:  d.IndexedAt,
 		PageRank:   d.PageRank,
 	}
 }
 
-func makeEsDoc(d *index.Document) esDoc {
+func makeEsDoc(d *documentRepository.Document) esDoc {
 	return esDoc{
-		LinkID:    d.DocumentId.String(),
-		URL:       d.Url,
-		Title:     d.Title,
-		Content:   d.Content,
-		IndexedAt: d.IndexedAt.UTC(),
+		DocumentID: d.DocumentId.String(),
+		URL:        d.Url,
+		Title:      d.Title,
+		Content:    d.Content,
+		IndexedAt:  d.IndexedAt.UTC(),
 	}
 }

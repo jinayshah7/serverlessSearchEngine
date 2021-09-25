@@ -11,15 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/es"
-	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
-	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi"
-	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/textindexerapi/proto"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
-)
 
 func main() error {
 	var wg sync.WaitGroup
