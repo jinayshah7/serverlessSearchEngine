@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
-	"net/http"
-	_ "net/http/pprof"
 	"net/url"
 	"os"
 	"strings"
 	"sync"
 
+	"github.com/jinayshah7/distributedSearchEngine/proto/documentRepository"
 	"google.golang.org/grpc"
+)
 
 func main() error {
 	var wg sync.WaitGroup
@@ -21,12 +22,12 @@ func main() error {
 	grpcPort := os.Getenv("GRPC_PORT")
 	documentRepositoryURL := os.Getenv("DOCUMENT_REPOSITORY_URL")
 
-	indexer, err := getTextIndexer(documentRepositoryURL)
+	repository, err := getTextIndexer(documentRepositoryURL)
 	if err != nil {
 		return err
 	}
 
-	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort)))
+	grpcListener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
 		return err
 	}
@@ -36,8 +37,7 @@ func main() error {
 	go func() {
 		defer wg.Done()
 		grpcServer := grpc.NewServer()
-		documentRepositoryServer : = NewDocumentRepositoryServer(indexer))
-		documentRepository.RegisterDocumentRepositoryServer(grpcServer, documentRepositoryServer)
+		documentRepository.RegisterDocumentRepositoryServer(grpcServer, repository)
 		_ = srv.Serve(grpcListener)
 	}()
 
@@ -59,6 +59,6 @@ func getDocumentRepository(documentRepositoryURL string) (documentRepository.doc
 	for i := 0; i < len(nodes); i++ {
 		nodes[i] = "http://" + nodes[i]
 	}
-	return es.NewElasticSearchIndexer(nodes, false)
+	return NewElasticSearchIndexer(nodes, false)
 
 }

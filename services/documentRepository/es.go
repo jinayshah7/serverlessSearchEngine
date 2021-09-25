@@ -141,12 +141,12 @@ func (i *ElasticSearchIndexer) Index(doc *documentRepository.Document) error {
 	return nil
 }
 
-func (i *ElasticSearchIndexer) FindByID(documentId uuid.UUID) (*index.Document, error) {
+func (i *ElasticSearchIndexer) FindByID(documentId uuid.UUID) (*documentRepository.Document, error) {
 	var buf bytes.Buffer
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
 			"match": map[string]interface{}{
-				"LinkID": documentId.String(),
+				"DocumentID": DocumentID.String(),
 			},
 		},
 		"from": 0,
@@ -168,11 +168,14 @@ func (i *ElasticSearchIndexer) FindByID(documentId uuid.UUID) (*index.Document, 
 	return mapEsDoc(&searchRes.Hits.HitList[0].DocSource), nil
 }
 
-func (i *ElasticSearchIndexer) Search(q index.Query) (index.Iterator, error) {
+func (i *ElasticSearchIndexer) Search(q index.Query) (esSearchRes, error) {
 	var qtype string
+
 	switch q.Type {
+
 	case index.QueryTypePhrase:
 		qtype = "phrase"
+
 	default:
 		qtype = "best_fields"
 	}
@@ -203,11 +206,12 @@ func (i *ElasticSearchIndexer) Search(q index.Query) (index.Iterator, error) {
 		return nil, errors.New(fmt.Sprintf("search: %w", err))
 	}
 
-	return &esIterator{es: i.es, searchReq: query, rs: searchRes, cumIdx: q.Offset}, nil
+	return searchRes, nil
 }
 
-func (i *ElasticSearchIndexer) UpdateScore(documentId uuid.UUID, score float64) error {
+func (i *ElasticSearchIndexer) SetPageRankScore(documentId uuid.UUID, score float64) error {
 	var buf bytes.Buffer
+
 	update := map[string]interface{}{
 		"doc": map[string]interface{}{
 			"DocumentID": documentId.String(),

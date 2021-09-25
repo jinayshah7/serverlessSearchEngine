@@ -26,10 +26,7 @@ message SearchQuery {
 }
 
 message SearchResult {
-  oneof result {
-    uint64 doc_count = 1;
-    Document doc = 2;
-  }
+    repeated Document doc = 1;
 }
 
 message SetPageRankScoreRequest {
@@ -47,7 +44,7 @@ message DocumentID {
 
 service DocumentRepository {
   rpc Index(Document) returns (Document);
-  rpc Search(SearchQuery) returns (stream SearchResult);
+  rpc Search(SearchQuery) returns (SearchResult);
   rpc SetPageRankScore(SetPageRankScoreRequest) returns (google.protobuf.Empty);
-  rpc GetPageRankScore(DocumentID) returns (PageRankScore);
+  rpc FindByID(DocumentID) returns (Document);
 }
