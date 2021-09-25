@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,7 +12,7 @@ import (
 	"github.com/elastic/go-elasticsearch"
 	"github.com/elastic/go-elasticsearch/esapi"
 	"github.com/google/uuid"
-	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
+	"github.com/jinayshah7/distributedSearchEngine/proto/documentRepository"
 	"golang.org/x/xerrors"
 )
 
@@ -23,7 +24,7 @@ var esMappings = `
 {
   "mappings" : {
     "properties": {
-      "LinkID": {"type": "keyword"},
+      "DocumentID": {"type": "keyword"},
       "URL": {"type": "keyword"},
       "Content": {"type": "text"},
       "Title": {"type": "text"},
@@ -76,18 +77,13 @@ func (e esError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Type, e.Reason)
 }
 
-// Compile-time check to ensure ElasticSearchIndexer implements Indexer.
-var _ index.Indexer = (*ElasticSearchIndexer)(nil)
+var _ documentRepository.DocumentRepositoryServer = (*ElasticSearchIndexer)(nil)
 
-// ElasticSearchIndexer is an Indexer implementation that uses an elastic search
-// instance to catalogue and search documents.
 type ElasticSearchIndexer struct {
 	es         *elasticsearch.Client
 	refreshOpt func(*esapi.UpdateRequest)
 }
 
-// NewElasticSearchIndexer creates a text indexer that uses an in-memory
-// bleve instance for indexing documents.
 func NewElasticSearchIndexer(esNodes []string, syncUpdates bool) (*ElasticSearchIndexer, error) {
 	cfg := elasticsearch.Config{
 		Addresses: esNodes,
@@ -112,11 +108,9 @@ func NewElasticSearchIndexer(esNodes []string, syncUpdates bool) (*ElasticSearch
 	}, nil
 }
 
-// Index inserts a new document to the index or updates the index entry
-// for and existing document.
-func (i *ElasticSearchIndexer) Index(doc *index.Document) error {
-	if doc.LinkID == uuid.Nil {
-		return xerrors.Errorf("index: %w", index.ErrMissingLinkID)
+func (i *ElasticSearchIndexer) Index(doc *documentRepository.Document) error {
+	if doc.DocumentId == uuid.Nil {
+		return errors.New(Sprintf("index: cannot find the specified document id: %v", doc.DocumentId))
 	}
 
 	var (
@@ -128,23 +122,22 @@ func (i *ElasticSearchIndexer) Index(doc *index.Document) error {
 		"doc_as_upsert": true,
 	}
 	if err := json.NewEncoder(&buf).Encode(update); err != nil {
-		return xerrors.Errorf("index: %w", err)
+		return errors.New("index: %w", err)
 	}
 
 	res, err := i.es.Update(indexName, esDoc.LinkID, &buf, i.refreshOpt)
 	if err != nil {
-		return xerrors.Errorf("index: %w", err)
+		return errors.New(fmt.Sprintf("index: %w", err))
 	}
 
 	var updateRes esUpdateRes
 	if err = unmarshalResponse(res, &updateRes); err != nil {
-		return xerrors.Errorf("index: %w", err)
+		return errors.New(fmt.Sprintf("index: %w", err))
 	}
 
 	return nil
 }
 
-// FindByID looks up a document by its link ID.
 func (i *ElasticSearchIndexer) FindByID(linkID uuid.UUID) (*index.Document, error) {
 	var buf bytes.Buffer
 	query := map[string]interface{}{
@@ -157,23 +150,21 @@ func (i *ElasticSearchIndexer) FindByID(linkID uuid.UUID) (*index.Document, erro
 		"size": 1,
 	}
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		return nil, xerrors.Errorf("find by ID: %w", err)
+		return nil, errors.New(fmt.Sprintf("find by ID: %w", err))
 	}
 
 	searchRes, err := runSearch(i.es, query)
 	if err != nil {
-		return nil, xerrors.Errorf("find by ID: %w", err)
+		return nil, errors.New(fmt.Sprintf("find by ID: %w", err))
 	}
 
 	if len(searchRes.Hits.HitList) != 1 {
-		return nil, xerrors.Errorf("find by ID: %w", index.ErrNotFound)
+		return nil, errors.New(fmt.Sprintf("find by ID: %w", index.ErrNotFound))
 	}
 
 	return mapEsDoc(&searchRes.Hits.HitList[0].DocSource), nil
 }
 
-// Search the index for a particular query and return back a result
-// iterator.
 func (i *ElasticSearchIndexer) Search(q index.Query) (index.Iterator, error) {
 	var qtype string
 	switch q.Type {
@@ -206,36 +197,34 @@ func (i *ElasticSearchIndexer) Search(q index.Query) (index.Iterator, error) {
 
 	searchRes, err := runSearch(i.es, query)
 	if err != nil {
-		return nil, xerrors.Errorf("search: %w", err)
+		return nil, errors.New(fmt.Sprintf("search: %w", err))
 	}
 
 	return &esIterator{es: i.es, searchReq: query, rs: searchRes, cumIdx: q.Offset}, nil
 }
 
-// UpdateScore updates the PageRank score for a document with the
-// specified link ID. If no such document exists, a placeholder
-// document with the provided score will be created.
-func (i *ElasticSearchIndexer) UpdateScore(linkID uuid.UUID, score float64) error {
+func (i *ElasticSearchIndexer) UpdateScore(documentId uuid.UUID, score float64) error {
 	var buf bytes.Buffer
 	update := map[string]interface{}{
 		"doc": map[string]interface{}{
-			"LinkID":   linkID.String(),
-			"PageRank": score,
+			"DocumentID": documentId.String(),
+			"PageRank":   score,
 		},
 		"doc_as_upsert": true,
 	}
+
 	if err := json.NewEncoder(&buf).Encode(update); err != nil {
-		return xerrors.Errorf("update score: %w", err)
+		return errors.New(fmt.Sprintf("update score: %w", err))
 	}
 
-	res, err := i.es.Update(indexName, linkID.String(), &buf, i.refreshOpt)
+	res, err := i.es.Update(indexName, documentId.String(), &buf, i.refreshOpt)
 	if err != nil {
-		return xerrors.Errorf("update score: %w", err)
+		return errors.New(Sprintf("update score: %w", err))
 	}
 
 	var updateRes esUpdateRes
 	if err = unmarshalResponse(res, &updateRes); err != nil {
-		return xerrors.Errorf("update score: %w", err)
+		return errors.New(fmt.Sprintf("update score: %w", err))
 	}
 
 	return nil
@@ -245,13 +234,15 @@ func ensureIndex(es *elasticsearch.Client) error {
 	mappingsReader := strings.NewReader(esMappings)
 	res, err := es.Indices.Create(indexName, es.Indices.Create.WithBody(mappingsReader))
 	if err != nil {
-		return xerrors.Errorf("cannot create ES index: %w", err)
+		return errors.New(Sprintf("cannot create ES index: %w", err))
 	} else if res.IsError() {
+
 		err := unmarshalError(res)
+
 		if esErr, valid := err.(esError); valid && esErr.Type == "resource_already_exists_exception" {
 			return nil
 		}
-		return xerrors.Errorf("cannot create ES index: %w", err)
+		return errors.New(fmt.Sprintf("cannot create ES index: %w", err))
 	}
 
 	return nil
@@ -260,10 +251,9 @@ func ensureIndex(es *elasticsearch.Client) error {
 func runSearch(es *elasticsearch.Client, searchQuery map[string]interface{}) (*esSearchRes, error) {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(searchQuery); err != nil {
-		return nil, xerrors.Errorf("find by ID: %w", err)
+		return nil, errors.New(fmt.Sprintf("find by ID: %w", err))
 	}
 
-	// Perform the search request.
 	res, err := es.Search(
 		es.Search.WithContext(context.Background()),
 		es.Search.WithIndex(indexName),
@@ -302,19 +292,19 @@ func unmarshalResponse(res *esapi.Response, to interface{}) error {
 
 func mapEsDoc(d *esDoc) *index.Document {
 	return &index.Document{
-		LinkID:    uuid.MustParse(d.LinkID),
-		URL:       d.URL,
-		Title:     d.Title,
-		Content:   d.Content,
-		IndexedAt: d.IndexedAt.UTC(),
-		PageRank:  d.PageRank,
+		DocumentId: uuid.MustParse(d.LinkID),
+		Url:        d.URL,
+		Title:      d.Title,
+		Content:    d.Content,
+		IndexedAt:  d.IndexedAt.UTC(),
+		PageRank:   d.PageRank,
 	}
 }
 
 func makeEsDoc(d *index.Document) esDoc {
 	return esDoc{
-		LinkID:    d.LinkID.String(),
-		URL:       d.URL,
+		LinkID:    d.DocumentId.String(),
+		URL:       d.Url,
 		Title:     d.Title,
 		Content:   d.Content,
 		IndexedAt: d.IndexedAt.UTC(),

@@ -10,7 +10,8 @@ message Document {
   string url = 2;
   string title = 3;
   string content = 4;
-  google.protobuf.Timestamp indexed_at = 5;
+  uint64 page_rank = 5;
+  google.protobuf.Timestamp indexed_at = 6;
 }
 
 message SearchQuery {
