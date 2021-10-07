@@ -17,7 +17,6 @@ message Document {
 message SearchQuery {
   Type type = 1;
   string expression = 2;
-  uint64 offset = 3;
 
   enum Type {
     MATCH = 0;
@@ -43,7 +42,7 @@ message DocumentID {
 }
 
 service DocumentRepository {
-  rpc Index(Document) returns (Document);
+  rpc Index(Document) returns (google.protobuf.Empty);
   rpc Search(SearchQuery) returns (SearchResult);
   rpc SetPageRankScore(SetPageRankScoreRequest) returns (google.protobuf.Empty);
   rpc FindByID(DocumentID) returns (Document);

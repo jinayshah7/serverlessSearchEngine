@@ -26,9 +26,13 @@ message RemoveOldEdgesQuery {
   google.protobuf.Timestamp updated_before = 2;
 }
 
-service LinkRepository {
+message Edges {
+  repeated Edge = 1;
+}
 
+service LinkRepository {
   rpc SaveLink(Link) returns (Link);
   rpc SaveEdge(Edge) returns (Edge);
   rpc RemoveOldEdges(RemoveOldEdgesQuery) returns (google.protobuf.Empty);
+  rpc FindAllEdgesFrom(Link) returns (Edges);
 }
