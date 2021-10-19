@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pagerank-service 
+  name: web-page-processor 
   labels:
-    app: pagerank-service 
+    app: web-page-processor 
 spec:
   selector:
     matchLabels:
-      app: pagerank-service 
+      app: web-page-processor 
   replicas: 1
   template:
     metadata:
       labels:
-        app: pagerank-service 
+        app: web-page-processor 
     spec:
       containers:
-      - name: pagerank-1
+      - name: web-page-processor 
         imagePullPolicy: Always
-        image: jinayshah7/services-pagerank:latest
+        image: jinayshah7/web-page-processor:latest
         env:
           - name: SOURCE_TOPIC
             value: source_topic_name
