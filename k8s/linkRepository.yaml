@@ -33,7 +33,7 @@ spec:
         image: localhost:5000/services-linkgraph:latest
         env:
           - name: LINK_REPOSITORY_URL
-            value: postgresql://cdb-cockroachdb-public.services-data:26257/linkgraph?sslmode=disable"
+            value: "postgresql://cdb-cockroachdb-public:26257/linkgraph?sslmode=disable"
         ports:
         - containerPort: 8080
           name: grpc

@@ -11,6 +11,6 @@ spec:
         imagePullPolicy: Always
         image: localhost:5000/cdb-schema:latest
         args: 
-         - "linkgraph"
-         - "cdb-cockroachdb-public.services-data"
+         - "linkrepository"
+         - "cdb-cockroachdb-public"
       restartPolicy: Never

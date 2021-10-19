@@ -1,9 +1,7 @@
-# A service with a cluster IP that serves as a load-balancer for the textindexer.
 apiVersion: v1
 kind: Service
 metadata:
-  name: services-textindexer
-  namespace: services-data
+  name: document-repository 
 spec:
   type: ClusterIP
   ports:
@@ -11,32 +9,32 @@ spec:
     targetPort: 8080
     name: grpc
   selector:
-    app: services-textindexer-instance
+    app: document-repository-instance
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: services-textindexer-instance
-  namespace: services-data
+  name: document-repository-instance
   labels:
-    app: services-textindexer-instance
+    app: document-repository-instance
 spec:
   selector:
     matchLabels:
-      app: services-textindexer-instance
+      app: document-repository-instance
   replicas: 2
   template:
     metadata:
       labels:
-        app: services-textindexer-instance
+        app: document-repository-instance
         role: data-api
     spec:
       containers:
-      - name: services-textindexer
+      - name: document-repository
         imagePullPolicy: Always
-        image: localhost:5000/services-textindexer:latest
-        args:
-          - "-text-indexer-uri=es://elasticsearch-master.services-data:9200"
+        image: jinayshah7/document-repository:latest
+        env:
+          - name: DOCUMENT_REPOSITORY_URL
+            value: "es://elasticsearch-master:9200" 
         ports:
         - containerPort: 8080
           name: grpc
