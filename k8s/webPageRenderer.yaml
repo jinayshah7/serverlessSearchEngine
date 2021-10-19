@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pagerank-service 
+  labels:
+    app: pagerank-service 
+spec:
+  selector:
+    matchLabels:
+      app: pagerank-service 
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pagerank-service 
+    spec:
+      containers:
+      - name: pagerank-1
+        imagePullPolicy: Always
+        image: jinayshah7/services-pagerank:latest
+        env:
+          - name: SOURCE_TOPIC
+            value: source_topic_name
+          - name: DESTINATION_TOPIC
+            value: destination_topic_name
+        resources:
+          limits:
+            cpu: "1"
+          requests:
+            cpu: 50m
