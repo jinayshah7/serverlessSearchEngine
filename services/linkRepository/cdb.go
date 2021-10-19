@@ -27,27 +27,26 @@ RETURNING id, updated_at
 `
 	removeOldEdgesQuery = "DELETE FROM edges WHERE src=$1 AND updated_at < $2"
 
-	_ linkRepository.LinkRepositoryServer = (*CockroachDBGraph)(nil)
+	_ linkRepository.LinkRepositoryServer = (*CockroachDBRepository)(nil)
 )
 
-type CockroachDBGraph struct {
+type CockroachDBRepository struct {
 	db *sql.DB
 }
 
-func NewCockroachDbGraph(dsn string) (*CockroachDBGraph, error) {
+func NewCockroachDbGraph(dsn string) (*CockroachDBRepository, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	return &CockroachDBGraph{db: db}, nil
-}
+	return &CockroachDBRepository{db: db}, nil }
 
-func (c *CockroachDBGraph) Close() error {
+func (c *CockroachDBRepository) Close() error {
 	return c.db.Close()
 }
 
-func (c *CockroachDBGraph) SaveLink(ctx context.Context, link *linkRepository.Link) (*linkRepository.Link, error) {
+func (c *CockroachDBRepository) SaveLink(ctx context.Context, link *linkRepository.Link) (*linkRepository.Link, error) {
 	row := c.db.QueryRow(saveLinkQuery, link.Url, link.RetrievedAt)
 	if err := row.Scan(&link.Uuid, &link.RetrievedAt); err != nil {
 		return &linkRepository.Link{}, errors.New(fmt.Sprintf("upsert link: %w", err))
@@ -56,12 +55,12 @@ func (c *CockroachDBGraph) SaveLink(ctx context.Context, link *linkRepository.Li
 	return link, nil
 }
 
-func (c *CockroachDBGraph) RemoveOldEdges(ctx context.Context, r *linkRepository.RemoveOldEdgesQuery) (*emptypb.Empty, error) {
+func (c *CockroachDBRepository) RemoveOldEdges(ctx context.Context, r *linkRepository.RemoveOldEdgesQuery) (*emptypb.Empty, error) {
 
 	return &emptypb.Empty{}, nil
 }
 
-func (c *CockroachDBGraph) FindLink(id uuid.UUID) (*linkRepository.Link, error) {
+func (c *CockroachDBRepository) FindLink(id uuid.UUID) (*linkRepository.Link, error) {
 	row := c.db.QueryRow(findLinkQuery, id)
 	link := &linkRepository.Link{Uuid: id[:]}
 	if err := row.Scan(&link.Url, &link.RetrievedAt); err != nil {
@@ -75,7 +74,7 @@ func (c *CockroachDBGraph) FindLink(id uuid.UUID) (*linkRepository.Link, error) 
 	return link, nil
 }
 
-func (c *CockroachDBGraph) SaveEdge(ctx context.Context, edge *linkRepository.Edge) (*linkRepository.Edge, error) {
+func (c *CockroachDBRepository) SaveEdge(ctx context.Context, edge *linkRepository.Edge) (*linkRepository.Edge, error) {
 	row := c.db.QueryRow(saveEdgeQuery, edge.SourceUuid, edge.DestinationUuid)
 	if err := row.Scan(&edge.Uuid, &edge.UpdatedAt); err != nil {
 		if isForeignKeyViolationError(err) {

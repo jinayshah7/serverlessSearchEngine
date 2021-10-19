@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/jinayshah7/distributedSearchEngine/services/crawler/crawler/privnet"
 	"github.com/jinayshah7/distributedSearchEngine/services/crawler/partition"
-	"github.com/jinayshah7/distributedSearchEngine/services/linkgraph/graph"
-	"github.com/jinayshah7/distributedSearchEngine/services/textindexer/index"
 	"github.com/juju/clock"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"

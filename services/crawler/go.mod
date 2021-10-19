@@ -1,3 +1,3 @@
-module github.com/jinayshah7/distributSearchEngine/services/crawler
+module github.com/jinayshah7/distributedSearchEngine/services/crawler
 
 go 1.17

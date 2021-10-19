@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"sync"
+  "strconv"
 
 	"github.com/jinayshah7/distributedSearchEngine/proto/linkRepository"
 	"google.golang.org/grpc"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-	grpcPort := os.Getenv("GRPC_PORT")
+	grpcPort, _ := strconv.Atoi(os.Getenv("GRPC_PORT"))
 	linkRepositoryURL := os.Getenv("LINK_REPOSITORY_URL")
 
 	repository, err := getLinkRepository(linkRepositoryURL)
@@ -40,7 +41,7 @@ func main() {
 
 func getLinkRepository(linkRepositoryURL string) (linkRepository.LinkRepositoryServer, error) {
 	if linkRepositoryURL == "" {
-		return nil, errors.New("Link Graph URI not found")
+		return nil, errors.New("Link repository URL not found")
 	}
-	return NewCockroachDbGraph(linkRepositoryURL)
+	return NewCockroachDbRepository(linkRepositoryURL)
 }

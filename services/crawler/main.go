@@ -30,7 +30,6 @@ func main() {
 	if err != nil {
 		return err
 	}
-
 	graphAPI, indexerAPI, err := getAPIs(ctx, linkGraphURL, textIndexerURL)
 	if err != nil {
 		return err
@@ -48,7 +47,7 @@ func main() {
 	if err != nil {
 		return log.Fatalf("Could not initialize crawler service: %v", err.String())
 	}
-
+  
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
