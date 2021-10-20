@@ -9,28 +9,28 @@ spec:
     targetPort: 8080
     name: grpc
   selector:
-    app: link-repository-instance
+    app: link-repository
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: link-repository-instance
+  name: link-repository
   labels:
-    app: link-repository-instance
+    app: link-repository
 spec:
   selector:
     matchLabels:
-    app: link-repository-instance
-  replicas: 2
+    app: link-repository
+  replicas: 1
   template:
     metadata:
       labels:
-        app: link-repository-instance
+        app: link-repository
     spec:
       containers:
-      - name: services-linkgraph
+      - name: link-repository 
         imagePullPolicy: Always
-        image: localhost:5000/services-linkgraph:latest
+        image: localhost:5000/link-repository:latest
         env:
           - name: LINK_REPOSITORY_URL
             value: "postgresql://cdb-cockroachdb-public:26257/linkgraph?sslmode=disable"

@@ -1,18 +1,16 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: services-ingress
-  namespace: services
+  name: ingress
 spec:
   backend:
-    serviceName: services-frontend
+    serviceName: frontend
     servicePort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: services-frontend
-  namespace: services
+  name: frontend
 spec:
   type: ClusterIP
   ports:
@@ -20,32 +18,33 @@ spec:
     targetPort: 8080
     name: web
   selector:
-    app: services-frontend-instance
+    app: frontend
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: services-frontend-instance
-  namespace: services
+  name: frontend
   labels:
-    app: services-frontend-instance
+    app: frontend
 spec:
   selector:
     matchLabels:
-      app: services-frontend-instance
-  replicas: 2
+      app: frontend
+  replicas: 1
   template:
     metadata:
       labels:
-        app: services-frontend-instance
+        app: frontend
     spec:
       containers:
-      - name: services-frontend
+      - name: frontend
         imagePullPolicy: Always
-        image: localhost:5000/services-frontend:latest
-        args:
-          - "-link-graph-api=services-linkgraph.services-data:8080"
-          - "-text-indexer-api=services-textindexer.services-data:8080"
+        image: jinayshah7/frontend:latest
+        env:
+          - name: LINK_REPOSITORY_URL
+            value: "link-repository:8080"
+          - name: DOCUMENT_REPOSITORY_URL
+            value: "document-repository:8080"
         ports:
         - containerPort: 8080
           name: www

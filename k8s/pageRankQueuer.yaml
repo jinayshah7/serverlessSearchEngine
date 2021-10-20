@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pagerank-service 
+  name: pagerank-queuer 
   labels:
-    app: pagerank-service 
+    app: pagerank-queuer 
 spec:
   selector:
     matchLabels:
-      app: pagerank-service 
+      app: pagerank-queuer 
   replicas: 1
   template:
     metadata:
       labels:
-        app: pagerank-service 
+        app: pagerank-queuer 
     spec:
       containers:
-      - name: pagerank-1
+      - name: pagerank-queuer
         imagePullPolicy: Always
-        image: jinayshah7/services-pagerank:latest
+        image: jinayshah7/pagerank-queuer:latest
         env:
           - name: SOURCE_TOPIC
             value: source_topic_name

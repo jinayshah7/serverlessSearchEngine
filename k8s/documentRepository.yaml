@@ -9,23 +9,23 @@ spec:
     targetPort: 8080
     name: grpc
   selector:
-    app: document-repository-instance
+    app: document-repository
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: document-repository-instance
+  name: document-repository
   labels:
-    app: document-repository-instance
+    app: document-repository
 spec:
   selector:
     matchLabels:
-      app: document-repository-instance
-  replicas: 2
+      app: document-repository
+  replicas: 1
   template:
     metadata:
       labels:
-        app: document-repository-instance
+        app: document-repository
         role: data-api
     spec:
       containers:

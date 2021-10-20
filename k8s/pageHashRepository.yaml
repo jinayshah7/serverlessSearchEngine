@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pagerank-service 
+  name: page-hash-repository 
   labels:
-    app: pagerank-service 
+    app: page-hash-repository 
 spec:
   selector:
     matchLabels:
-      app: pagerank-service 
+      app: page-hash-repository 
   replicas: 1
   template:
     metadata:
       labels:
-        app: pagerank-service 
+        app: page-hash-repository 
     spec:
       containers:
-      - name: pagerank-1
+      - name: page-hash-repository 
         imagePullPolicy: Always
-        image: jinayshah7/services-pagerank:latest
+        image: jinayshah7/page-hash-repository:latest
         env:
           - name: SOURCE_TOPIC
             value: source_topic_name
