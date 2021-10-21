@@ -1,45 +1,61 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"log"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/Shopify/sarama"
 )
 
-func main() {
-	//brokers := os.Getenv("KAFKA_BROKERS")
+type link struct {
+	URL string
+}
 
-	err := connectKafka()
+func main() {
+	brokers := []string{"localhost:29092", "localhost:39092"}
+
+	topic := "linksFound"
+	producer, err := newProducer()
 	if err != nil {
-		log.Fatalln("Failed to start Sarama producer:", err)
+		log.Fatalln("Failed to set up Kafka connection", err)
+	}
+	message := prepareMessage(topic, "first message, it works")
+	producer.SendMessage(message)
+
+	consumer, err := sarama.NewConsumer(brokers, nil)
+	if err != nil {
+		fmt.Println("Could not create consumer: ", err)
+	}
+	partitionList, err := consumer.Partitions(topic)
+	if err != nil {
+		fmt.Println("Error retrieving partitionList ", err)
+	}
+	initialOffset := sarama.OffsetOldest
+	for _, partition := range partitionList {
+		pc, _ := consumer.ConsumePartition(topic, partition, initialOffset)
+		for message := range pc.Messages() {
+			fmt.Println(string(message.Value))
+		}
 	}
 }
 
-func connectKafka() error {
-
-	brokers := "localhost:29092,localhost:39092"
-	sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
-
-	brokerList := strings.Split(brokers, ",")
-	log.Printf("Kafka brokers: %s", strings.Join(brokerList, ", "))
-
+func newProducer() (sarama.SyncProducer, error) {
+	brokers := []string{"localhost:29092", "localhost:39092"}
 	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForLocal
-	config.Producer.Compression = sarama.CompressionSnappy
-	config.Producer.Flush.Frequency = 500 * time.Millisecond
-	producer, err := sarama.NewAsyncProducer(brokerList, config)
+	config.Producer.Partitioner = sarama.NewRandomPartitioner
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Return.Successes = true
+	producer, err := sarama.NewSyncProducer(brokers, config)
 
-	if err != nil {
-		return errors.New("could not start Sarama client")
+	return producer, err
+}
+
+func prepareMessage(topic, message string) *sarama.ProducerMessage {
+	msg := &sarama.ProducerMessage{
+		Topic:     topic,
+		Partition: -1,
+		Value:     sarama.StringEncoder(message),
 	}
 
-	go func() {
-		for err := range producer.Errors() {
-			log.Println("Failed to write access log entry:", err)
-		}
-	}()
+	return msg
 }
