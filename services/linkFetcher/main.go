@@ -39,17 +39,6 @@ func main() {
 	}
 }
 
-func newProducer() (sarama.SyncProducer, error) {
-	brokers := []string{"localhost:29092", "localhost:39092"}
-	config := sarama.NewConfig()
-	config.Producer.Partitioner = sarama.NewRandomPartitioner
-	config.Producer.RequiredAcks = sarama.WaitForAll
-	config.Producer.Return.Successes = true
-	producer, err := sarama.NewSyncProducer(brokers, config)
-
-	return producer, err
-}
-
 func prepareMessage(topic, message string) *sarama.ProducerMessage {
 	msg := &sarama.ProducerMessage{
 		Topic:     topic,
