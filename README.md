@@ -14,6 +14,10 @@ I want to build a real product end to end and share it with everyone. It’s eas
 ### Where is it deployed? Can I use it?
 It’s not deployed anywhere right now, it’s a work in progress.
 
+### If You're Not Familiar With The Names Below
+- **PlanetScale** - It's a serverless Postgres offering. We can use their API and not worry about managing/upgrading servers.
+- **Algolia** - It's a serverless search index offering. It's a nicer version of Elasticsearch.
+
 ### What's the high level architecture?
 - **PlanetScale** - Each web page links to other webpages, forming a graph. This repo stores webpages and their links between them in the form of two indexed columns: source and destination
 - **Algolia** - Algolia will store and index the webpage, so we can search for it later on.
