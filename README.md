@@ -32,7 +32,7 @@ It’s not deployed anywhere right now, it’s a work in progress.
 - **PageProcessor** - Takes a rendered web page and extracts links/text from it.
 - **PageSaver** - Save web page to Algolia and Cloudflare R2. Save links to PlanetScale.
 - **PageRankQueuer** - PageRank processing happens in iterations, so this will find a random webpage in the current stage and queue it for processing.
-- **PageRankProcessor** - Takes a queued web page and computes its new PageRank score. If the web page has links to more web pages in it, those are also queued for processing [only if they are in the same stage]. It's the Breadth First Search Algorithm at work here. This particular web page is moved to the next iteration.
+- **PageRankProcessor** - Takes a queued web page, computes its new PageRank score and sends it to Algolia. If the web page has links to more web pages in it, those are also queued for processing [only if they are in the same stage]. It's the Breadth First Search Algorithm at work here. This particular web page is moved to the next iteration. 
 - **PageRankState** - Stores variables like iteration number, residual value for current iteration, etc that are needed for the PageRank algorithm. It uses Cloudflare KV for storage.
 ![Architecture](architecture.png)
 Cloudflare Queues act as a glue for the whole pipeline. Cloudflare Workers will work to perform each of these individual steps. Each worker will take data from a queue, process it and put it in another queue. The workers are all independent of each other, each one does their job regardless of what the other ones do.
