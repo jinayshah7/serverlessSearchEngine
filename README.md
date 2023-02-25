@@ -1,58 +1,35 @@
-# README
+### **What's new here? Why build this?**
+I want to build a real product end to end and share it with everyone. It’s easy to find system designs like these but finding a practical implementation + explanation is hard and rare. I’m here to fill that gap.
 
-### **Why build this? What's new here?**
+### What’s different from the previous design?
+- Before this I tried doing everything from scratch on Kubernetes. This time focusing on getting the job done, keeping it simple and using a managed solution in every possible place. The simpler it is, the better.
+- That is why it’s Cloudflare Queues instead of Kafka, Cloudflare KV instead of Redis, Cloudflare Workers instead of Kubernetes microservices, PlanetScale instead of Postgres Operator and Algolia instead of Elasticsearch.
+- This time I’m not using any GPT3 or BERT vectors, I’ll rely on Algolia to handle the semantic search. Algolia also supports autocomplete, so I won’t have to reinvent that either.
+- This time I’m using plain old JSON instead of gRPC. Of course gRPC has its host of advantages but I’m more fascinated by JSON’s simplicity at the moment.
 
-- It’s my attempt to cover development of a real world product end to end. I have learned a lot while working on this and I expect that to continue.
-- A bigger goal is to have good onboarding documentation, videos so that new devs benefit from it. I want them to have access to a fully working, thoroughly tested and complex product running in production. Open access to knowledge is my top priority.
+### Why choose Cloudflare?
+- Simple
+- Cheap
 
-### **Why choose Go?**
+### Where is it deployed? Can I use it?
+It’s not deployed anywhere right now, it’s a work in progress.
 
-- Simplicity
-- Strongly typed and compiled
-- Fast and lightweight
-- Encourages good coding practices
-- Easy to deploy
-
-### **Where is it deployed? Can I use it?**
-
-It’s not deployed anywhere right now, I’m still coding the services. It’s a work in progress.
-
-### **What's the high level architecture?**
-
-- **LinkRepository** - Each webpage links to other webpages, forming a graph. This repo stores webpages and their links between them in the form of (source, destination) using CockroachDB
-- **DocumentRepository** - Each webpage is a document with text in it. This repo uses Elasticsearch save all documents and index them for searching later on.
-- **PageHashRepository** - Stores a hash of all processed documents and links. It helps avoid processing duplicate pages.
-- **FrontendService** - Provides a REST API endpoint for searching links and submitting new ones.
-- **LinkFetcherService** - Gets new links from the LinkRepository and adds them to a Kafka topic for processing.
-- **WebPageRendererService** - Takes a link and returns contents of the rendered webpage. It needs to support static and dynamic webpages, which is why it’s an entirely separate service.
-- **WebPageProcessorService** - Takes a rendered webpage and extracts links/text from it.
-- **BERTVectorizerService** - Takes the text from the processed webpage and produces a vector for it. This vector will be used by Elasticsearch to rank search results along with the PageRank score.
-- **DocumentSaverService** - Gets all fully processed documents from Kafka and saves them to DocumentRepository
-- **PageRankQueuer** - Finds unprocessed documents in the current iteration and lines them up in a Kafka topic.
-- **PageRankProcessor** - Takes an unprocessed document from Kafka and computes it’s new PageRank score. If the document has links to more documents in it, those documents are also added to a Kafka topic for processing. It’s Breadth First Search Algorithm at work here.
-- **PageRankStateRepository** - Stores variables like iteration number, residual value for current iteration, etc that are needed for the PageRank algorithm. Uses Redis for fast queries.
-
+### What's the high level architecture?
+- **PlanetScale** - Each web page links to other webpages, forming a graph. This repo stores webpages and their links between them in the form of two indexed columns: source and destination
+- **Algolia** - Algolia will store and index the webpage, so we can search for it later on.
+- **PageHashes** - This will help us check if a web page has already been processed before.
+- **Frontend** - Simple React app to search webpages stored in Algolia.
+- **LinkFetcher** - Get a random link from PlanetScale and queue it for processing.
+- **PageRenderer** - Takes a link and returns contents of the rendered webpage. It needs to support static and dynamic web pages.
+- **PageProcessor** - Takes a rendered web page and extracts links/text from it.
+- **PageSaver** - Save web page to Algolia and Cloudflare R2. Save links to PlanetScale.
+- **PageRankQueuer** - PageRank processing happens in iterations, so this will find a random webpage in the current stage and queue it for processing.
+- **PageRankProcessor** - Takes a queued web page and computes its new PageRank score. If the web page has links to more web pages in it, those are also queued for processing [only if they are in the same stage]. It's the Breadth First Search Algorithm at work here. This particular web page is moved to the next iteration.
+- **PageRankState** - Stores variables like iteration number, residual value for current iteration, etc that are needed for the PageRank algorithm. It uses Cloudflare KV for storage.
 ![Architecture](architecture.png)
+Cloudflare Queues act as a glue for the whole pipeline. Cloudflare Workers will work to perform each of these individual steps. Each worker will take data from a queue, process it and put it in another queue. The workers are all independent of each other, each one does their job regardless of what the other ones do.
 
-Kafka acts as a glue for the whole operation. Each service takes data from a topic, processes it and puts it back into another topic. The services are all independent of each other, each keeps doing their job regardless of what the other services do.
-
-### **How can I run this locally?**
-
-Not right now, but the goal is to make it super easy to run this locally with a single docker-compose file. It’s a work in progress.
-
-### **Can I contribute to this project?**
-
-Feel free to create a PR, I’m more than happy to review and merge it.
-
-### **What's the long term goal for this search engine?**
-
-- Onboarding videos and documentation
-- Clean code, full test coverage and minimal tech debt
-- Autocomplete
-- Use AWS for hosting all services
-- Support for image indexing and search
-- Terraform support
-- CI/CD with Github Actions
-- Sign-in with Google OAuth2
-- User Activity Tracking using URLs
-- React Frontend
+### **Exciting New Features To Be Added?**
+- User login and link tracking
+- Support for image searches
+- Frontend with autocomplete
