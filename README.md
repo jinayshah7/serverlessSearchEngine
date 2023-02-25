@@ -17,6 +17,10 @@ It’s not deployed anywhere right now, it’s a work in progress.
 ### If You're Not Familiar With The Names Below
 - **PlanetScale** - It's a serverless Postgres offering. We can use their API and not worry about managing/upgrading servers.
 - **Algolia** - It's a serverless search index offering. It's a nicer version of Elasticsearch.
+- **Cloudflare Workers KV** - It's like Redis but serverless and provided by Cloudflare.
+- **Cloudflare Queues** - It's like Kafka but simpler, serverless and provided by Cloudflare.
+- **Cloudflare R2** - It's Cloudflare's version of AWS S3.
+- **Cloudflare Workers** - It's like AWS Lambda but with no cold starts and cheaper.
 
 ### What's the high level architecture?
 - **PlanetScale** - Each web page links to other webpages, forming a graph. This repo stores webpages and their links between them in the form of two indexed columns: source and destination
