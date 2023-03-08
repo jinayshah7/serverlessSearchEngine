@@ -1,62 +1,56 @@
 import Queue from 'queue';
 import { generateMD5Hash } from 'crypto';
 import { createClient } from '@planetscale/cli';
+import { KVNamespace } from '@cloudflare/workers-kv'
 
-addEventListener('fetch', (event) => {
-  event.respondWith(handleRequest(event.request));
-});
+addEventListener('scheduled', event => {
+  event.respondWith(handleScheduled())
+})
 
-const PLANETSCALE_API_TOKEN = '<your PlanetScale API token>';
-const PLANETSCALE_DB_NAME = '<your database name>';
-const PLANETSCALE_TABLE_NAME = 'LinkGraph';
+const cronSchedule = '0 * * * *'
+const timezone = 'UTC'
 
-const KV_NAMESPACE_NAME = '<your KV namespace name>';
+const scheduleOptions = {cron: cronSchedule, timezone: timezone}
+const scheduledEvent = new ScheduledEvent('hourly-cron', scheduleOptions)
+scheduledEvent.schedule()
+
+const PLANETSCALE_API_TOKEN = await SECRETS.PLANETSCALE_API_KEY;
+const DB_NAME = await SECRETS.DB_NAME;
+const LINKGRAPH_TABLE_NAME = 'LinkGraph';
+const UNVISITED_LINKS_TABLE_NAME = 'LinkGraph';
+const INPUT_QUEUE_NAME = 'RenderedPages';
+const OUTPUT_QUEUE_NAME = 'ProcessedPages';
+const VISITED_PAGE_HASHES_KV_NAMESPACE = 'VisitedPagesHashes';
+
 
 const client = createClient({
   token: PLANETSCALE_API_TOKEN,
 });
 
-const db = client.database(PLANETSCALE_DB_NAME);
+const db = client.database(DB_NAME);
+const kv = new KVNamespace(VISITED_PAGE_HASHES_KV_NAMESPACE);
 
-const kv = await MY_KV_NAMESPACE.get('VisitedPages');
+async function handleScheduled() {
 
-async function handleRequest(request) {
-  const queue = new Queue('RenderedPages');
-  
-  const message = await queue.pop();
-  const { link: sourceLink, content } = JSON.parse(message);
+  let message = await getContentFromQueue()
+  const links = extractLinks(message.content);
+  await addLinksToLinkGraph(message.link, links)
+  await saveLinksToDatabase(links)
+  await saveMessageToQueue(message)
 
-  const links = extractLinks(content);
-  
-  const newRows = links.map((link) => {
-    const row = {
-      source: sourceLink,
-      destination: link,
-    };
-    return row;
-  });
-  
-  await db.getTable(PLANETSCALE_TABLE_NAME).insert(newRows);
+  return new Response('Done');
+}
 
-  const unvisitedLinks = [];
-  for (const link of links) {
-    const linkHash = generateMD5Hash(link);
-    if (!kv[linkHash]) {
-      unvisitedLinks.push(link);
-      kv[linkHash] = true;
-    }
-  }
+async function saveMessageToQueue(message){
+  const processedQueue = new Queue(OUTPUT_QUEUE_NAME);
+  await processedQueue.push(message);
+}
 
-  const processedMessage = JSON.stringify({ link: sourceLink, content });
-  const processedQueue = new Queue('ProcessedPages');
-  await processedQueue.push(processedMessage);
-
-  const unvisitedTable = await db.getTable('UnvisitedLinks');
+async function saveLinksToDatabase(links){
+  const unvisitedTable = await db.getTable(UNVISITED_LINKS_TABLE_NAME);
   await Promise.all(unvisitedLinks.map(async (link) => {
     await unvisitedTable.insert({ link });
   }));
-
-  return new Response('Done');
 }
 
 function extractLinks(content) {
@@ -66,25 +60,30 @@ function extractLinks(content) {
   return links;
 }
 
-async function getKVNamespace() {
-  const namespace = await MY_KV.getNamespace(KV_NAMESPACE_NAME);
-  return namespace;
+async function getContentFromQueue() {
+  const queue = new Queue(INPUT_QUEUE_NAME);
+  const message = await queue.pop();
+  const { link, content } = JSON.parse(message);
+  return { link, content };
 }
 
-/*
+async function addLinksToLinkGraph(sourceLink, links){
+  const newRows = links.map((link) => {
+    const row = {
+      source: sourceLink,
+      destination: link,
+    };
+    return row;
+  });
+  
+  await db.getTable(LINKGRAPH_TABLE_NAME).insert(newRows);
 
-Write a Cloudflare worker that does the following:
-
-- Gets triggered when there is a new message in a queue named "RenderedPages"
-- Assume the queue is already created, just import it
-- Extracts a field called link and content from the message. we'll call that link sourceLink
-- Extract all links from the content
-- For each link found, make a new row in the table called LinkGraph in PlanetScale
-- Two columns: source and destination. Each row will look like this (sourceLink, link found in the content)
-- Construct one single SQL query and make only one API call
-- For each link found, check if it's md5 hash is present in the VisitedPages KV namespace.
-- If link is present, continue to the next step. If link is not found, get the md5 hash of that link and make a new key in KV.
-- Add that link the to the UnvisitedLinks table in PlanetScale
-- Put the sourcelink and content in a queue called "ProcessedPages"
-
-*/
+  const unvisitedLinks = [];
+  for (const link of links) {
+    const linkHash = generateMD5Hash(link);
+    if (!kv[linkHash]) {
+      unvisitedLinks.push(link);
+      kv[linkHash] = true;
+    }
+  }
+}

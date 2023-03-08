@@ -1,59 +1,75 @@
-/*
 
-Write a Cloudflare worker that does the following:
-
-- Check the PageRankState KV namespace for a key called "Iteration Number", let's call it N. Get N first.
-- Call the PlanetScale API to get a random row from the table called VisitedLinks. I want one row with column iteration_number <= N
-- Along with that, also set the iteration_number column for that row to N+1.
-- Do both tasks using a single SQL query and API call.
-- Save the row contents to a Cloudflare queue with the name PageRankQueue
-
-
-*/
-
-// Import the required modules
-import { MY_PLANETSCALE_API_KEY, MY_PLANETSCALE_DB } from './secrets.js';
-import { Client } from '@planetscale/client';
+import { createClient } from '@planetscale/cli';
 import { Queue } from 'cloudflare-workers';
 
-// Initialize the PlanetScale API client
-const planetScaleApiClient = new Client({ api_key: MY_PLANETSCALE_API_KEY }).table(MY_PLANETSCALE_DB.database, 'VisitedLinks');
+addEventListener('scheduled', event => {
+  event.respondWith(handleScheduled())
+})
+
+const cronSchedule = '0 * * * *'
+const timezone = 'UTC'
+
+const scheduleOptions = {cron: cronSchedule, timezone: timezone}
+const scheduledEvent = new ScheduledEvent('hourly-cron', scheduleOptions)
+scheduledEvent.schedule()
 
 // Define the name of the PageRankState KV namespace
-const pageRankStateNamespace = 'PageRankState';
+const PAGE_RANK_STATE_KV_NAMESPACE = 'PageRankState';
+const PLANETSCALE_API_TOKEN = await SECRETS.PLANETSCALE_API_KEY;
+const DB_NAME = await SECRETS.DB_NAME;
+const OUTPUT_QUEUE_NAME = 'PageRankQueue';
+
+const client = createClient({
+  token: PLANETSCALE_API_TOKEN,
+});
+
+const db = client.database(DB_NAME);
+const kv = new KVNamespace(PAGE_RANK_STATE_KV_NAMESPACE);
 
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request));
 });
 
 async function handleRequest(request) {
-  // Get the current iteration number from the PageRankState KV namespace
-  const iterationNumber = parseInt(await PAGE_RANK_STATE.get('Iteration Number'));
 
-  // Construct the SQL query to get a random row from the VisitedLinks table with iteration_number <= N
+  const iterationNumber = getIterationNumber();
+  link = await getLinkFromDatabase(iterationNumber)
+  await saveMessageToQueue(link)
+
+  return new Response("Link queued for page rank processing", { status: 200 })
+}
+
+async function saveMessageToQueue(link){
+  const queue = new Queue(OUTPUT_QUEUE_NAME);
+  await queue.push(link);
+}
+
+async function getIterationNumber(){
+  parseInt(await kv.get('Iteration Number'));
+}
+
+async function getLinkFromDatabase(iterationNumber){
+
   const sqlQuery = `SELECT * FROM VisitedLinks WHERE iteration_number <= ${iterationNumber} ORDER BY RAND() LIMIT 1`;
 
   try {
-    // Call the PlanetScale API to execute the SQL query and get a random row from the VisitedLinks table
-    const result = await planetScaleApiClient.query(sqlQuery);
 
-    // Get the row data from the API response
-    const rowData = result[0];
+    const visitedTable = await db.getTable(VISITED_LINKS_TABLE_NAME);
+    const result = await visitedTable.query(sqlQuery);
+    if (result.length == 0) {
+        await kv.set('Iteration Number', iterationNumber+1);
+        return {};
+    }
+    const link = result[0];
 
-    // Set the iteration_number column for the selected row to N+1
-    await planetScaleApiClient.update({
-      where: { id: rowData.id },
-      data: { iteration_number: iterationNumber + 1 }
+    await visitedTable.update({
+      where: { id: link.id },
+      data: { iteration_number: link.iterationNumber + 1 }
     });
 
-    // Get the PageRankQueue queue using the Cloudflare SDK
-    const queue = new Queue(MY_CLOUDFLARE_ACCOUNT, 'PageRankQueue');
+    return link
 
-    // Save the row contents to the PageRankQueue queue
-    await queue.put(JSON.stringify(rowData));
-
-    return new Response(`Random row from VisitedLinks table saved to PageRankQueue: ${JSON.stringify(rowData)}`, { status: 200 });
   } catch (error) {
-    return new Response(`Error: ${error.message}`, { status: 500 });
+    return {};
   }
 }

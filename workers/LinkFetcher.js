@@ -1,12 +1,19 @@
 import { Queue } from 'https://cdn.jsdelivr.net/npm/@workers-queue/queue'
 
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
+addEventListener('scheduled', event => {
+  event.respondWith(handleScheduled(event.request))
 })
 
-async function handleRequest(request) {
+const cronSchedule = '0 * * * *'
+const timezone = 'UTC'
+
+const scheduleOptions = {cron: cronSchedule, timezone: timezone}
+const scheduledEvent = new ScheduledEvent('hourly-cron', scheduleOptions)
+scheduledEvent.schedule()
+
+async function handleScheduled(request) {
   // Authenticate with PlanetScale API
-  const apiKey = 'YOUR_PLANETSCALE_API_KEY'
+  const apiKey = await SECRETS.PLANETSCALE_API_KEY
   const headers = { 'Authorization': `Bearer ${apiKey}` }
 
   // Get random row from UnvisitedLinks
@@ -23,23 +30,8 @@ async function handleRequest(request) {
 
   // Save result to Cloudflare queue
   const queueName = 'FetchedLinks'
-  const queue = new Queue(queueName, {
-    accountId: 'YOUR_ACCOUNT',
-    durable: true,
-  })
+  const queue = new Queue(queueName)
   await queue.add({ link: unvisitedLink })
 
   return new Response('Success', { status: 200 })
 }
-
-/*
-
-Write a Cloudflare worker that does the following:
-
-- Call the PlanetScale API to get a random row from the table called UnvisitedLinks
-- It will call the API to transfer that link to another table called VisitedLinks
-- Do both tasks using a single SQL query and API call.
-- Save it to a Cloudflare queue with the name FetchedLinks
-
-
-*/

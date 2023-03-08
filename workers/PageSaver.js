@@ -1,45 +1,42 @@
 // Import the Cloudflare Workers KV and Algolia libraries
-const { Queue } = require('cloudflare-workers-kv')
-const algoliasearch = require('algoliasearch')
+import { Queue } from 'cloudflare-workers-kv';
+import algoliasearch from 'algoliasearch';
 
-// Set up the Algolia connection
-const client = algoliasearch('<your Algolia application ID>', '<your Algolia API key>')
-const index = client.initIndex('<your Algolia index>')
-
-// Define your Cloudflare Worker
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event))
+addEventListener('scheduled', event => {
+  event.respondWith(handleScheduled())
 })
 
-async function handleRequest(event) {
+const cronSchedule = '0 * * * *'
+const timezone = 'UTC'
+
+const scheduleOptions = {cron: cronSchedule, timezone: timezone}
+const scheduledEvent = new ScheduledEvent('hourly-cron', scheduleOptions)
+scheduledEvent.schedule()
+
+
+const ALGOLIA_APPLICATION_ID = await SECRETS.ALGOLIA_APPLICATION_ID;
+const ALGOLIA_APPLICATION_KEY = await SECRETS.ALGOLIA_APPLICATION_KEY;
+const ALGOLIA_INDEX = await SECRETS.ALGOLIA_INDEX;
+const INPUT_QUEUE_NAME = 'ProcessedPages';
+
+const client = algoliasearch(ALGOLIA_APPLICATION_ID, ALGOLIA_APPLICATION_KEY);
+const index = client.initIndex(ALGOLIA_INDEX);
+
+async function handleScheduled() {
   // Get a reference to the "ProcessedPages" queue
-  const processedPages = new Queue('ProcessedPages')
+  const page = getPageFromQueue()
 
-  // Wait for the next message in the "ProcessedPages" queue
-  await processedPages.awaitQueue()
-
-  // Process the next message in the "ProcessedPages" queue
-  while (true) {
-    const message = await processedPages.get()
-    if (!message) {
-      break
-    }
-
-    // Send the message to Algolia for storage and indexing
     await index.addObject({
-      url: message.value
+      url: page.link,
+      content: page.content
     })
-  }
 
-  return new Response('Processed all messages', { status: 200 })
+  return new Response('Page Saved', { status: 200 })
 }
 
-/*
-
-Write a Cloudflare worker that does the following:
-
-- Gets triggered when there is a new message in a queue named "ProcessedPages"
-- Extracts a field called Link and Content in the message
-- Send this data to Algolia for indexing, use Link as the ID
-
-*/
+async function getPageFromQueue() {
+  const queue = new Queue(INPUT_QUEUE_NAME);
+  const page = await queue.pop();
+  const { link, content } = JSON.parse(page);
+  return { link, content };
+}
